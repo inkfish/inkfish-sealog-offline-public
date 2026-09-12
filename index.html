@@ -1,0 +1,1708 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png?v=sealog-1">
+  <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png?v=sealog-1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png?v=sealog-1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Sealog Offline">
+  <meta name="theme-color" content="#f5f3f0" data-dynamic="true">
+  <meta name="theme-color" content="#0a0e14" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#f5f3f0" media="(prefers-color-scheme: light)">
+  <title>Sealog Offline Logger</title>
+  <!--
+Theme palettes and fixed accent colors adapted from Understand-Anything.
+Source reference: https://github.com/Egonex-AI/Understand-Anything/tree/0566ea8b6b0f5e301ea125736e89568047105dd1
+See THIRD_PARTY_NOTICES.md for the source mapping and modification details.
+
+MIT License
+
+Copyright (c) 2026 Yuxiang Lin
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+  -->
+  <style>
+    /* Theme presets and accent variables. */
+
+    /* Default Light palette, overridden by the theme manager. */
+    :root, :root[data-preset="light"] {
+      color-scheme: light;
+      --bg:            #f5f3f0;
+      --surface:       #ffffff;
+      --surface-2:     #eae7e3;
+      --panel:         #f0ede9;
+      --line:          rgba(26,26,26,0.12);
+      --line-strong:   rgba(26,26,26,0.24);
+      --ink:           #1a1a1a;
+      --ink-2:         #6b6b6b;
+      --mute:          #a0a0a0;
+      --accent:        #4a6fa5;
+      --accent-bright: #6088bf;
+      --accent-dim:    #3d5f8f;
+      --accent-fg:     #ffffff;
+      --accent-soft:   rgba(74,111,165,0.10);
+      --ok:            #3a8a5c;
+      --ok-soft:       rgba(58,138,92,0.10);
+      --warn:          #9e7a30;
+      --warn-soft:     rgba(158,122,48,0.10);
+      --alert:         #a5566a;
+      --alert-soft:    rgba(165,86,106,0.10);
+      --run:           #3a8ab5;
+      --run-soft:      rgba(58,138,181,0.10);
+      --shadow-1:      0 1px 2px rgba(0,0,0,0.04);
+      --shadow-modal:  0 20px 50px rgba(0,0,0,0.18);
+    }
+
+    :root[data-preset="honey"] {
+      color-scheme: dark;
+      --bg:            #0a0a0a;
+      --surface:       #141414;
+      --surface-2:     #1a1a1a;
+      --panel:         #111111;
+      --line:          rgba(245,240,235,0.10);
+      --line-strong:   rgba(245,240,235,0.20);
+      --ink:           #f5f0eb;
+      --ink-2:         #a39787;
+      --mute:          #6b5f53;
+      --accent:        #d4a574;
+      --accent-bright: #e8c49a;
+      --accent-dim:    #c9a96e;
+      --accent-fg:     #0a0a0a;
+      --accent-soft:   rgba(212,165,116,0.16);
+      --ok:            #5a9e6f;
+      --ok-soft:       rgba(90,158,111,0.18);
+      --warn:          #c9963a;
+      --warn-soft:     rgba(201,150,58,0.18);
+      --alert:         #cf7a8a;
+      --alert-soft:    rgba(207,122,138,0.18);
+      --run:           #5ba4cf;
+      --run-soft:      rgba(91,164,207,0.16);
+      --shadow-1:      0 1px 3px rgba(0,0,0,0.4);
+      --shadow-modal:  0 20px 50px rgba(0,0,0,0.55);
+    }
+
+    :root[data-preset="ocean"] {
+      color-scheme: dark;
+      --bg:            #0a0e14;
+      --surface:       #141c24;
+      --surface-2:     #1a222c;
+      --panel:         #111820;
+      --line:          rgba(232,237,242,0.10);
+      --line-strong:   rgba(232,237,242,0.20);
+      --ink:           #e8edf2;
+      --ink-2:         #87939f;
+      --mute:          #536b7a;
+      --accent:        #5ba4cf;
+      --accent-bright: #7abce0;
+      --accent-dim:    #4e93ba;
+      --accent-fg:     #0a0e14;
+      --accent-soft:   rgba(91,164,207,0.16);
+      --ok:            #5a9e6f;
+      --ok-soft:       rgba(90,158,111,0.18);
+      --warn:          #c9963a;
+      --warn-soft:     rgba(201,150,58,0.18);
+      --alert:         #cf7a8a;
+      --alert-soft:    rgba(207,122,138,0.18);
+      --run:           #5ba4cf;
+      --run-soft:      rgba(91,164,207,0.16);
+      --shadow-1:      0 1px 3px rgba(0,0,0,0.4);
+      --shadow-modal:  0 20px 50px rgba(0,0,0,0.55);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; min-height: 100%; }
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font: 400 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      font-feature-settings: "ss01","cv11";
+      -webkit-font-smoothing: antialiased;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+    [hidden] { display: none !important; }
+    /* Visually hidden but still announced by screen readers. */
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    .mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; font-feature-settings: "tnum"; }
+    ::selection { background: var(--accent-soft); color: var(--ink); }
+
+    main {
+      width: min(640px, 100%);
+      padding: 14px 14px calc(env(safe-area-inset-bottom, 0px) + 28px) 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Typography */
+    h1 { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: -0.005em; color: var(--ink); }
+    h2 { margin: 0; font-size: 10.5px; font-weight: 600; letter-spacing: 0.10em; text-transform: uppercase; color: var(--mute); }
+    h3 { margin: 0; font-size: 15px; font-weight: 600; color: var(--ink); }
+    .title, .form-field .title {
+      display: block;
+      font-size: 10.5px;
+      font-weight: 600;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: var(--mute);
+    }
+    .title.small { font-size: 10px; }
+    .title.notes-label { margin-top: 2px; }
+
+    /* Top bar */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 0 2px;
+    }
+    .title-group { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+
+    /* Icon-only buttons */
+    .icon-button {
+      width: 40px;
+      height: 40px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      color: var(--ink-2);
+      cursor: pointer;
+      padding: 0;
+      font-size: 0;
+      transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+    }
+    .icon-button:hover { background: var(--surface-2); color: var(--ink); border-color: var(--line-strong); }
+    .icon-button:active { transform: scale(0.97); }
+    .icon-button:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--accent-soft); }
+    .icon-button.small { width: 32px; height: 32px; border-radius: 5px; }
+    .icon-button .ic, .icon-button > svg { width: 18px; height: 18px; }
+    .icon-button.small .ic, .icon-button.small > svg { width: 14px; height: 14px; }
+
+    /* Static Phosphor icons use the local, upstream-derived sprite. */
+    .ic {
+      width: 1em;
+      height: 1em;
+      display: inline-block;
+      flex-shrink: 0;
+      fill: currentColor;
+      stroke: none;
+    }
+
+    /* Phosphor sprite icons inherit text color and size. */
+    svg.ph {
+      width: 1em;
+      height: 1em;
+      fill: currentColor;
+      stroke: none;
+      flex: 0 0 auto;
+    }
+    .ui-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      width: 1em;
+      height: 1em;
+      flex: 0 0 auto;
+    }
+    .event-status-chip .status-icon { font-size: 11px; }
+    .event-chevron-icon { font-size: 14px; }
+
+    /* The update overlay sits above other modals. The combined selector
+       preserves vertical centering over the base overlay alignment. */
+    .modal-overlay.update-overlay {
+      align-items: center;
+      z-index: 1200;
+    }
+    .modal-card.update-card {
+      width: min(360px, calc(100% - 32px));
+      max-width: 360px;
+      padding: 22px 22px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: stretch;
+      text-align: left;
+    }
+    .modal-card.update-card h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      text-transform: none;
+      color: var(--ink);
+    }
+    .modal-card.update-card p {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.45;
+      color: var(--ink-2);
+    }
+    .modal-card.update-card #reloadBtn {
+      width: 100%;
+      height: 48px;
+      font-size: 15px;
+      margin-top: 4px;
+    }
+    .modal-card.update-card #updateDismissBtn {
+      align-self: center;
+    }
+
+    /* Status strip */
+    .status-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+    @media (max-width: 540px) {
+      .status-strip { grid-template-columns: repeat(2, 1fr); }
+    }
+    .status {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      padding: 8px 10px;
+      font-size: 11.5px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--ink);
+      min-height: 44px;
+      letter-spacing: 0;
+      text-align: left;
+      font-family: inherit;
+    }
+    /* Tappable variants — GPS + ASNAP open diagnostic modals. */
+    button.status-button {
+      cursor: pointer;
+      box-shadow: none;
+      transition: background 0.12s ease, border-color 0.12s ease;
+      width: 100%;
+    }
+    button.status-button:hover { background: var(--surface-2); border-color: var(--line-strong); }
+    button.status-button:focus-visible {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+    button.status-button::after {
+      content: '';
+      width: 16px;
+      height: 16px;
+      margin-left: auto;
+      color: var(--mute);
+      background-color: currentColor;
+      -webkit-mask: url('icons/phosphor-caret-right.svg?v=2b75f3ad12b4') center / contain no-repeat;
+      mask: url('icons/phosphor-caret-right.svg?v=2b75f3ad12b4') center / contain no-repeat;
+      transition: transform 0.12s ease, color 0.12s ease;
+      flex-shrink: 0;
+    }
+    button.status-button:hover::after { color: var(--ink-2); transform: translateX(2px); }
+    .status::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--mute);
+      flex-shrink: 0;
+    }
+    .status[data-state="ok"]    { color: var(--ok); }
+    .status[data-state="ok"]::before    { background: var(--ok); }
+    .status[data-state="warn"]  { color: var(--warn); }
+    .status[data-state="warn"]::before  { background: var(--warn); }
+    .status[data-state="alert"] { color: var(--alert); }
+    .status[data-state="alert"]::before { background: var(--alert); }
+
+    /* Panels */
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: var(--shadow-1);
+    }
+
+    /* Form */
+    .form-field { display: grid; gap: 6px; }
+    .field-group { display: grid; gap: 8px; }
+    .field-group + .field-group { margin-top: 0; }
+
+    input, select, textarea {
+      width: 100%;
+      /* 16px floor prevents iOS Safari from auto-zooming on focus */
+      font: 400 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      padding: 10px 12px;
+      border-radius: 5px;
+      border: 1px solid var(--line-strong);
+      background: var(--surface);
+      color: var(--ink);
+      min-height: 44px;
+      transition: border-color 0.12s, box-shadow 0.12s;
+    }
+    :root[data-preset="honey"] input,
+    :root[data-preset="honey"] select,
+    :root[data-preset="honey"] textarea,
+    :root[data-preset="ocean"] input,
+    :root[data-preset="ocean"] select,
+    :root[data-preset="ocean"] textarea {
+      background-color: var(--surface-2);
+    }
+    input::placeholder, textarea::placeholder { color: var(--mute); opacity: 0.7; }
+    input:focus-visible, select:focus-visible, textarea:focus-visible {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+    input:disabled, select:disabled, textarea:disabled { opacity: 0.55; cursor: not-allowed; }
+    textarea { min-height: 64px; resize: vertical; }
+    select {
+      appearance: none;
+      -webkit-appearance: none;
+      padding-right: 32px;
+      /* Theme-colored copies of the upstream Phosphor caret; generated with the sprite. */
+      background-image: url('icons/phosphor-caret-down-light.svg?v=2b75f3ad12b4');
+      background-repeat: no-repeat;
+      background-position: calc(100% - 12px) center;
+      background-size: 18px 18px;
+      cursor: pointer;
+    }
+    :root[data-preset="honey"] select,
+    :root[data-preset="ocean"] select {
+      background-image: url('icons/phosphor-caret-down-dark.svg?v=2b75f3ad12b4');
+    }
+    select::-ms-expand { display: none; }
+
+    /* Option fields */
+    .option-fields { display: grid; gap: 10px; }
+    .option-field {
+      display: grid;
+      gap: 6px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      background: var(--surface-2);
+    }
+    .option-field.auto {
+      background: var(--accent-soft);
+      border-color: color-mix(in srgb, var(--accent) 24%, var(--line));
+    }
+    .option-field label span,
+    .option-field .option-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: var(--mute);
+    }
+    .option-field input,
+    .option-field select,
+    .option-field textarea {
+      /* Keep 16px floor here too — option-field inputs are inside the capture
+         form and would otherwise trigger the same iOS Safari auto-zoom. */
+      font-size: 16px;
+      padding: 8px 10px;
+      min-height: 40px;
+    }
+    .option-field.invalid input,
+    .option-field.invalid select,
+    .option-field.invalid textarea {
+      border-color: var(--alert);
+      box-shadow: 0 0 0 1px var(--alert);
+    }
+    .option-error { color: var(--alert); font-size: 12px; margin: 0; }
+    .option-help { font-size: 12px; color: var(--mute); margin: 0; }
+    .option-radio-group, .option-checkbox-group { display: grid; gap: 6px; }
+    .option-radio, .option-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      min-height: 44px;
+      font-size: 14px;
+    }
+    .option-radio input, .option-checkbox input {
+      width: 18px; height: 18px;
+      accent-color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    /* Toggle row */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--ink);
+      min-height: 28px;
+      padding: 2px 0;
+    }
+    .toggle-row input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+      flex-shrink: 0;
+    }
+    /* Tight stack — used inside settings-section to defeat the parent flex-gap */
+    .toggle-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    /* Buttons */
+    button {
+      border: 1px solid var(--accent);
+      border-radius: 5px;
+      padding: 0 16px;
+      height: 44px;
+      min-height: 44px;
+      white-space: nowrap;
+      font: 600 14px/1 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      transition: background 0.12s, color 0.12s, border-color 0.12s, transform 0.05s;
+      background: var(--accent);
+      color: var(--accent-fg);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow: none;
+    }
+    button:hover { filter: brightness(1.06); }
+    button:active { transform: scale(0.98); }
+    button:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--accent-soft); }
+    button:disabled { opacity: 0.55; cursor: not-allowed; }
+    button.secondary {
+      background: transparent;
+      color: var(--ink);
+      border-color: var(--line-strong);
+    }
+    button.secondary:hover { background: var(--surface-2); border-color: var(--ink-2); filter: none; }
+    button.danger { background: var(--alert); color: white; border-color: var(--alert); }
+    button.danger:hover { filter: brightness(1.05); }
+    button.small { height: 32px; min-height: 32px; padding: 0 10px; font-size: 12px; }
+
+    .button-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .button-row > button { flex: 1 1 0; min-width: 120px; }
+
+    /* Primary capture button — extra emphasis on mobile */
+    #captureBtn {
+      width: 100%;
+      height: 54px;
+      font-size: 15px;
+      letter-spacing: 0.02em;
+      flex: 1 0 100%;
+    }
+
+    /* Form row (Category + Type side-by-side) */
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 460px) {
+      .form-row { grid-template-columns: 1fr; gap: 8px; }
+    }
+
+    /* Events panel header */
+    .events-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .events-actions { display: inline-flex; gap: 6px; }
+    .events-actions .icon-button { width: 32px; height: 32px; border-radius: 5px; }
+    .events-actions .icon-button .ic { width: 14px; height: 14px; }
+
+    /* GPS status */
+    .gps-status {
+      display: grid;
+      gap: 4px;
+      margin-top: 0;
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      font-size: 12px;
+      color: var(--mute);
+      padding: 9px 12px;
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      border-radius: 5px;
+    }
+    .gps-status > span { display: flex; align-items: center; gap: 6px; }
+    .gps-status .warn { color: var(--warn); }
+    .gps-status .alert { color: var(--alert); }
+
+    /* Diagnostic modal body — GPS + ASNAP modals.
+       Outer .modal-body provides 14px/18px padding; inner sections strip their
+       own padding so they don't double-up. */
+    .diag-body .settings-section { padding: 0; }
+    .diag-body .settings-section:not(:last-child) { padding-bottom: 14px; }
+    .diag-body .settings-section + .settings-section { padding-top: 14px; }
+
+    /* Filter chips */
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .filter-chip {
+      background: transparent;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0 14px;
+      height: 44px;
+      font: 500 12px/1 system-ui, sans-serif;
+      color: var(--mute);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      transition: background 0.12s, color 0.12s, border-color 0.12s;
+      min-height: 44px;
+    }
+    .filter-chip:hover { color: var(--ink); border-color: var(--line-strong); background: var(--surface-2); }
+    .filter-chip[aria-pressed="true"], .filter-chip.active {
+      background: var(--accent);
+      color: var(--accent-fg);
+      border-color: var(--accent);
+    }
+
+    /* Event list */
+    .events { display: grid; gap: 10px; }
+    .event-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+    .event-list li {
+      list-style: none;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      padding: 0;
+      overflow: hidden;
+      border-left: 3px solid var(--line);
+    }
+    .event-card[data-sync-state] { border-left-color: var(--warn); }
+    .event-card[data-sync-state="synced"] { border-left-color: var(--ok); }
+    .event-card[data-sync-state="patch-pending"],
+    .event-card[data-sync-state="patching"] { border-left-color: var(--run); }
+    .event-card[data-sync-state="patch-failed"] { border-left-color: var(--alert); }
+    .event-card.asnap { border-left-color: var(--accent); }
+
+    .event-summary {
+      height: auto;
+      width: 100%;
+      border: none;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      cursor: pointer;
+      text-align: left;
+      min-height: 44px;
+      color: var(--ink);
+    }
+    .event-summary:hover, .event-summary:focus-visible {
+      background: var(--surface-2);
+      outline: none;
+    }
+    .event-card[data-expanded="true"] .event-summary {
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--line);
+    }
+    .event-summary-main { flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+    .event-summary-top {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
+    .event-title { font-weight: 600; font-size: 13.5px; color: var(--ink); }
+    .event-status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 1px 7px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+    .event-status-chip.status-synced  { background: var(--ok-soft);    color: var(--ok); }
+    .event-status-chip.status-pending { background: var(--warn-soft);  color: var(--warn); }
+    .event-status-chip.status-syncing { background: var(--run-soft);   color: var(--run); }
+    .event-status-chip.status-error   { background: var(--alert-soft); color: var(--alert); }
+    .event-status-chip span[aria-hidden="true"] { font-size: 11px; }
+    .event-summary-meta {
+      display: flex;
+      flex-wrap: wrap;
+      row-gap: 4px;
+      column-gap: 0;
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      font-size: 11px;
+      color: var(--mute);
+    }
+    .event-summary-meta > span + span::before {
+      content: '·';
+      margin: 0 6px;
+      opacity: 0.5;
+    }
+    .event-summary-meta .event-primary { font-weight: 600; color: var(--ink); }
+    .event-note {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 100%;
+      font-family: system-ui, sans-serif;
+    }
+    @media (max-width: 540px) {
+      .event-summary-meta .event-primary,
+      .event-summary-meta .event-relative { display: none; }
+    }
+    .event-chevron {
+      font-size: 14px;
+      color: var(--mute);
+      transition: transform 0.18s;
+      flex-shrink: 0;
+    }
+    .event-card[data-expanded="true"] .event-chevron { transform: rotate(180deg); color: var(--ink); }
+    .event-detail {
+      padding: 10px 12px 12px;
+      border-top: 1px solid var(--line);
+      display: grid;
+      gap: 10px;
+    }
+    .event-detail[hidden] { display: none !important; }
+    .event-detail-list {
+      margin: 0;
+      padding: 0;
+      font-size: 12.5px;
+      line-height: 1.45;
+    }
+    .event-detail-row {
+      display: grid;
+      grid-template-columns: minmax(96px, 28%) 1fr;
+      column-gap: 12px;
+      padding: 7px 0;
+    }
+    .event-detail-row + .event-detail-row {
+      border-top: 1px solid var(--line);
+    }
+    .event-detail-label {
+      margin: 0;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--mute);
+      padding-top: 2px;
+    }
+    .event-detail-value {
+      margin: 0;
+      color: var(--ink);
+      word-break: break-word;
+    }
+    .event-detail-value.mono {
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      font-size: 12px;
+    }
+    @media (max-width: 540px) {
+      .event-detail-row {
+        grid-template-columns: 1fr;
+        row-gap: 1px;
+      }
+      .event-detail-label { padding-top: 0; }
+    }
+
+    /* Auto-fill rules modal */
+    .help.warn {
+      color: var(--warn);
+      background: var(--warn-soft);
+      border: 1px solid var(--warn);
+      border-radius: 6px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 12.5px;
+      line-height: 1.45;
+    }
+    .help.warn::before {
+      content: '';
+      width: 14px;
+      height: 14px;
+      background-color: currentColor;
+      -webkit-mask: url('icons/phosphor-warning-circle.svg?v=2b75f3ad12b4') center / contain no-repeat;
+      mask: url('icons/phosphor-warning-circle.svg?v=2b75f3ad12b4') center / contain no-repeat;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .autofill-intro {
+      font-size: 12.5px;
+      color: var(--mute);
+      line-height: 1.5;
+      margin: 0;
+    }
+    .autofill-intro strong { color: var(--ink); font-weight: 600; }
+    .autofill-field-list {
+      display: flex;
+      flex-direction: column;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .autofill-field-row {
+      padding: 14px 0;
+    }
+    .autofill-field-row:first-child { padding-top: 4px; }
+    .autofill-field-row + .autofill-field-row {
+      border-top: 1px solid var(--line);
+    }
+    .autofill-field-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .autofill-field-name {
+      font-weight: 600;
+      font-size: 14.5px;
+      color: var(--ink);
+      line-height: 1.2;
+    }
+    .autofill-field-badge {
+      font-size: 9.5px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-soft);
+      border-radius: 3px;
+      padding: 2px 6px;
+      line-height: 1.4;
+    }
+    .autofill-rule-line {
+      display: grid;
+      grid-template-columns: 64px 1fr;
+      align-items: center;
+      gap: 10px;
+    }
+    .autofill-rule-line + .autofill-rule-line {
+      margin-top: 8px;
+    }
+    .autofill-rule-line .label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--mute);
+    }
+    /* Inherit the 16px form-control font size to prevent iOS focus zoom. */
+    .autofill-empty {
+      text-align: center;
+      padding: 24px 16px;
+      color: var(--mute);
+      font-size: 13px;
+      line-height: 1.5;
+      border: 1px dashed var(--line);
+      border-radius: 6px;
+      background: var(--surface-2);
+      margin: 0;
+    }
+    @media (max-width: 540px) {
+      .autofill-rule-line {
+        grid-template-columns: 56px 1fr;
+        gap: 8px;
+      }
+    }
+
+    .event-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .event-actions button { flex: 0 0 auto; min-width: 0; }
+
+    /* Help text */
+    .help { font-size: 12px; color: var(--mute); margin: 0; line-height: 1.45; }
+    .help.version { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 11px; margin-top: 0; }
+    .help.muted { color: var(--mute); }
+    [role="status"] { font-size: 12px; color: var(--mute); }
+
+    /* Sheet header (used inside modal cards too) */
+    .sheet-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    /* Modal overlay */
+    html.modal-open { overflow: hidden; height: 100%; width: 100%; position: fixed; inset: 0; }
+    body.modal-open {
+      overflow: hidden;
+      position: fixed;
+      width: 100%;
+      left: 0;
+      right: 0;
+      height: 100%;
+      overscroll-behavior: contain;
+      touch-action: none;
+      margin: 0;
+    }
+    .modal-overlay {
+      position: fixed;
+      left: 0;
+      right: 0;
+      /* Default to viewport top/full height. app.js's attachModalViewportSync
+         writes --modal-vv-top and --modal-vvh from window.visualViewport so
+         the overlay tracks the visible viewport when the iOS soft keyboard
+         is up. */
+      top: var(--modal-vv-top, 0);
+      height: var(--modal-vvh, 100vh);
+      background: rgba(8, 12, 24, 0.45);
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: calc(env(safe-area-inset-top, 0px) + 28px) 12px calc(env(safe-area-inset-bottom, 0px) + 32px);
+      z-index: 1000;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      touch-action: none;
+    }
+    .modal-overlay[hidden] { display: none !important; }
+
+    .modal-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow-modal);
+      width: min(480px, 100%);
+      max-height: calc(var(--modal-vvh, 100vh) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 60px);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      margin: 0 auto;
+    }
+    .modal-card > h3,
+    .modal-card > .sheet-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .modal-card > h3 { margin: 0; font-size: 15px; font-weight: 600; color: var(--ink); }
+    .modal-card .sheet-header { gap: 12px; }
+    .modal-card .sheet-header h2 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: -0.005em;
+      color: var(--ink);
+      text-transform: none;
+    }
+    .modal-card form,
+    .modal-card .modal-body {
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+    /* .auth-form lives inside a .settings-section that already provides
+       padding — give the form layout properties but no extra padding. */
+    .modal-card .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+    .modal-card > form, .modal-card > .modal-body { overflow-y: auto; }
+    .modal-card .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 12px 18px;
+      background: var(--surface-2);
+      border-top: 1px solid var(--line);
+      flex-shrink: 0;
+    }
+    .modal-card .form-field { display: grid; gap: 6px; }
+    .modal-card input, .modal-card textarea, .modal-card select { width: 100%; }
+    .modal-card textarea { resize: vertical; min-height: 72px; }
+    .modal-card .option-fields { padding: 0; background: none; border: none; gap: 8px; }
+    .modal-card .option-field {
+      background: var(--surface-2);
+      border-radius: 5px;
+      border: 1px solid var(--line);
+      padding: 8px 10px;
+    }
+    .modal-card .option-field.invalid { border-color: var(--alert); }
+    .modal-card .option-error { color: var(--alert); font-size: 12px; margin: 4px 0 0; }
+    .modal-card.has-scroll-gradient::after { display: none; }
+    .modal-card.event-editor-card form { gap: 10px; }
+
+    /* Settings modal (#authPanel) */
+    .modal-card.auth-card {
+      display: flex;
+      flex-direction: column;
+      max-height: calc(var(--modal-vvh, 100vh) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 60px);
+    }
+    .modal-card.auth-card > .sheet-header {
+      flex: 0 0 auto;
+      border-bottom: 1px solid var(--line);
+    }
+    .auth-body {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .settings-section {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .settings-section:last-child { border-bottom: none; }
+
+    /* Data, auto-fill rules, and appearance use collapsible sections.
+       The account section remains expanded. */
+    details.settings-section.settings-accordion {
+      padding: 0;
+      display: block;
+    }
+    details.settings-section.settings-accordion > summary {
+      list-style: none;
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 18px;
+      min-height: 44px;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.12s ease;
+    }
+    details.settings-section.settings-accordion > summary::-webkit-details-marker { display: none; }
+    details.settings-section.settings-accordion > summary::marker { display: none; }
+    details.settings-section.settings-accordion > summary:hover { background: var(--surface-2); }
+    details.settings-section.settings-accordion > summary:focus-visible {
+      outline: none;
+      background: var(--surface-2);
+      box-shadow: inset 0 0 0 2px var(--accent-soft);
+    }
+    .settings-section-summary .settings-h { flex: 1; }
+    .accordion-chevron {
+      width: 14px;
+      height: 14px;
+      color: var(--mute);
+      transition: transform 0.18s ease;
+      flex-shrink: 0;
+    }
+    details.settings-section.settings-accordion[open] .accordion-chevron {
+      transform: rotate(180deg);
+      color: var(--ink-2);
+    }
+    .settings-section-content {
+      padding: 10px 18px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .settings-h {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--mute);
+      margin: 0;
+    }
+    .settings-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+    .settings-grid > button { width: 100%; }
+    @media (max-width: 460px) {
+      .settings-grid { grid-template-columns: 1fr; }
+    }
+
+    /* Signed-in card */
+    .signed-in-card {
+      padding: 12px;
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+    }
+    .signed-in-card .user-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .signed-in-card .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: var(--accent-fg);
+      font: 600 14px/1 system-ui, sans-serif;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      text-transform: uppercase;
+    }
+    .signed-in-card .user-info {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .signed-in-card .user-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ink);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .signed-in-card .user-meta {
+      font-size: 11px;
+      color: var(--mute);
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    }
+
+    /* Quiet text link button (Guest sign-in) */
+    .link-btn {
+      background: transparent;
+      color: var(--mute);
+      border: 0;
+      height: 32px;
+      padding: 0;
+      font: 500 12.5px/1 system-ui, sans-serif;
+      text-decoration: underline;
+      text-decoration-color: var(--line-strong);
+      text-underline-offset: 3px;
+      min-height: 32px;
+      box-shadow: none;
+      align-self: flex-start;
+    }
+    .link-btn:hover { background: transparent; color: var(--ink); text-decoration-color: var(--ink); filter: none; }
+    .link-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--accent-soft); border-radius: 3px; }
+
+    /* loginActions stacks Sign-in (primary) + Continue-as-guest (text link) on top of each other */
+    #loginActions { flex-direction: column; gap: 8px; align-items: stretch; }
+    #loginActions .link-btn { align-self: center; }
+    #loginActions > button:not(.link-btn) { flex: 1 1 auto; min-width: 0; }
+
+    /* Destructive-tinted secondary button */
+    button.secondary.danger-text {
+      color: var(--alert);
+      border-color: color-mix(in srgb, var(--alert) 30%, var(--line));
+    }
+    button.secondary.danger-text:hover {
+      background: var(--alert-soft);
+      color: var(--alert);
+      border-color: color-mix(in srgb, var(--alert) 50%, var(--line));
+    }
+
+    /* Version footer */
+    .settings-footer {
+      flex: 0 0 auto;
+      display: flex;
+      gap: 14px;
+      padding: 8px 18px;
+      background: var(--surface-2);
+      border-top: 1px solid var(--line);
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      font-size: 10.5px;
+      color: var(--mute);
+      letter-spacing: 0.02em;
+    }
+
+    /* Theme picker (iOS-style list rows) */
+    .theme-picker {
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      overflow: hidden;
+      background: var(--surface-2);
+    }
+    .preset-swatch {
+      display: grid;
+      grid-template-columns: 28px 1fr auto;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      min-height: 44px;
+      padding: 10px 12px;
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      border-bottom: 1px solid var(--line);
+      cursor: pointer;
+      text-align: left;
+      color: var(--ink);
+      font: 500 14px/1.3 system-ui, sans-serif;
+      transition: background 0.12s ease;
+    }
+    .preset-swatch:last-child { border-bottom: none; }
+    .preset-swatch:hover, .preset-swatch:active { background: var(--bg); }
+    .preset-swatch:focus-visible { outline: none; background: var(--bg); box-shadow: inset 0 0 0 2px var(--accent-soft); }
+    .ps-preview {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      border: 1px solid var(--line-strong);
+      background: var(--ps-bg, var(--surface));
+      position: relative;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .ps-preview::after {
+      content: '';
+      position: absolute;
+      left: 4px;
+      bottom: 4px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--ps-accent, var(--accent));
+    }
+    .preset-swatch .ps-label {
+      font-weight: 500;
+      color: var(--ink);
+      letter-spacing: 0;
+      text-transform: none;
+      font-size: 14.5px;
+    }
+    .ps-check {
+      width: 18px;
+      height: 18px;
+      color: var(--accent);
+      opacity: 0;
+      flex-shrink: 0;
+    }
+    .preset-swatch[aria-checked="true"] .ps-check { opacity: 1; }
+    .preset-swatch[aria-checked="true"] .ps-label { color: var(--ink); font-weight: 600; }
+
+    .form-grid { display: grid; gap: 8px; }
+
+
+    /* Sticky modal-footer (only when in flex containers with scroll) */
+    .modal-card form > .modal-footer,
+    .modal-card > .modal-footer {
+      position: sticky;
+      bottom: 0;
+      z-index: 2;
+    }
+
+    /* Mobile tweaks */
+    @media (max-width: 540px) {
+      main { padding: 10px 10px calc(env(safe-area-inset-bottom, 0px) + 24px) 10px; gap: 10px; }
+      .panel { padding: 12px; gap: 10px; }
+      h1 { font-size: 14px; }
+      .button-row { gap: 6px; }
+      .button-row > button { flex: 1 1 100%; min-width: 0; }
+      .modal-card { width: 100%; max-width: 100%; }
+      .modal-card form, .modal-card .modal-body { padding: 12px 14px; }
+      .modal-card > h3, .modal-card > .sheet-header { padding: 12px 14px; }
+      .modal-card .modal-footer { padding: 10px 14px; }
+    }
+  </style>
+</head>
+  <body>
+  <main>
+    <div id="updateBanner" class="modal-overlay update-overlay" hidden>
+      <div class="modal-card update-card" role="alertdialog" aria-modal="true" aria-labelledby="updateBannerTitle" aria-describedby="updateBannerText">
+        <h2 id="updateBannerTitle">New version available</h2>
+        <p id="updateBannerText">A newer version of Sealog Offline is ready. Reload to update.</p>
+        <button id="reloadBtn" type="button">Reload now</button>
+        <button id="updateDismissBtn" type="button" class="link-btn">Not now</button>
+      </div>
+    </div>
+    <header class="top-bar">
+      <div class="title-group">
+        <h1>Sealog Offline Logger</h1>
+      </div>
+      <button id="menuBtn" class="icon-button" type="button" aria-label="Open settings" aria-haspopup="true" aria-expanded="false" aria-controls="authPanel"><svg class="ic" viewBox="0 0 256 256" aria-hidden="true" focusable="false"><use href="icons/phosphor-sprite.svg?v=2b75f3ad12b4#ph-list"></use></svg></button>
+    </header>
+    <div class="status-strip">
+      <div id="connectStatus" class="status" data-state="warn">Sealog offline</div>
+      <button id="gpsStatus" class="status status-button" type="button" data-state="warn" aria-haspopup="dialog" aria-controls="gpsModal">GPS idle</button>
+      <button id="asnapStatusTile" class="status status-button" type="button" data-state="alert" aria-haspopup="dialog" aria-controls="asnapModal">ASNAP off</button>
+      <div id="queueInfo" class="status" data-state="warn">0 unsent / 0 total</div>
+    </div>
+    <!-- Off-screen mirror of the GPS warning so screen readers announce
+         accuracy/staleness changes even though #fixWarning itself is inside
+         the (default-hidden) #gpsModal. -->
+    <p id="fixWarningAnnounce" class="visually-hidden" role="status" aria-live="polite"></p>
+    <div id="authStatus" hidden></div>
+
+    <div id="authPanel" class="modal-overlay" hidden>
+      <div class="modal-card auth-card" role="dialog" aria-modal="true" aria-labelledby="authPanelTitle">
+        <div class="sheet-header">
+          <h2 id="authPanelTitle">Settings</h2>
+          <button id="authCloseBtn" class="icon-button small" type="button" aria-label="Close settings"><svg class="ic" viewBox="0 0 256 256" aria-hidden="true" focusable="false"><use href="icons/phosphor-sprite.svg?v=2b75f3ad12b4#ph-x"></use></svg></button>
+        </div>
+
+        <div class="auth-body">
+          <!-- ACCOUNT -->
+          <section class="settings-section">
+            <h3 class="settings-h">Account</h3>
+            <div class="auth-form" id="authForm">
+              <div class="form-grid" id="loginFields">
+                <p id="authSummary" class="help muted">Sign in to sync events with Sealog.</p>
+                <label class="form-field">
+                  <span class="title">Username</span>
+                  <input id="user" placeholder="username" autocomplete="username">
+                </label>
+                <label class="form-field" id="passwordField">
+                  <span class="title">Password</span>
+                  <input id="pass" placeholder="password" type="password" autocomplete="current-password">
+                </label>
+              </div>
+              <div id="loginActions" class="button-row">
+                <button id="loginBtn" type="button">Sign in</button>
+                <button id="guestBtn" type="button" class="link-btn">Continue as guest</button>
+              </div>
+            </div>
+            <div id="signedInActions" class="signed-in-card" hidden>
+              <div class="user-row">
+                <div class="user-avatar" id="signedInAvatar" aria-hidden="true">?</div>
+                <div class="user-info">
+                  <div class="user-name" id="signedInUser">—</div>
+                  <div class="user-meta" id="signedInMeta">Signed in to Sealog</div>
+                </div>
+                <button id="signOutBtn" class="secondary small" type="button">Sign out</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- DATA -->
+          <details class="settings-section settings-accordion" data-section="data" open>
+            <summary class="settings-section-summary">
+              <h3 class="settings-h">Data</h3>
+              <svg class="ic accordion-chevron" viewBox="0 0 256 256" aria-hidden="true" focusable="false"><use href="icons/phosphor-sprite.svg?v=2b75f3ad12b4#ph-caret-down"></use></svg>
+            </summary>
+            <div class="settings-section-content">
+              <div class="settings-grid">
+                <button id="loadServerEventsBtn" class="secondary small" type="button">Load Sealog Events</button>
+                <button id="refreshTemplatesBtn" class="secondary small" type="button">Refresh Templates</button>
+                <button id="clearSyncedBtn" class="secondary small danger-text" type="button">Clear Cached Events…</button>
+              </div>
+              <p class="help">Synced events are cached locally for offline review. Clearing removes them; unsynced local events stay.</p>
+            </div>
+          </details>
+
+          <!-- AUTO-FILL RULES -->
+          <details class="settings-section settings-accordion" data-section="autofill">
+            <summary class="settings-section-summary">
+              <h3 class="settings-h">Auto-fill rules</h3>
+              <svg class="ic accordion-chevron" viewBox="0 0 256 256" aria-hidden="true" focusable="false"><use href="icons/phosphor-sprite.svg?v=2b75f3ad12b4#ph-caret-down"></use></svg>
+            </summary>
+            <div class="settings-section-content">
+              <p class="help">Auto-populate template fields with UTC or GPS at log time or edit time.</p>
+              <p id="autoFillRulesSummary" class="help muted" role="status" aria-live="polite"></p>
+              <button id="autoFillRulesBtn" class="secondary small" type="button">Manage rules…</button>
+            </div>
+          </details>
+
+          <!-- APPEARANCE -->
+          <details class="settings-section settings-accordion" data-section="theme" open>
+            <summary class="settings-section-summary">
+              <h3 class="settings-h">Theme</h3>
+              <svg class="ic accordion-chevron" viewBox="0 0 256 256" aria-hidden="true" focusable="false"><use href="icons/phosphor-sprite.svg?v=2b75f3ad12b4#ph-caret-down"></use></svg>
+            </summary>
+            <div class="settings-section-content">
+              <div class="theme-picker" id="themePresetPicker" role="radiogroup" aria-label="Theme preset"></div>
+              <p id="themeStatus" class="help" role="status" aria-live="polite"></p>
+            </div>
+          </details>
+        </div>
+
+        <!-- VERSION FOOTER -->
+        <footer class="settings-footer">
+          <span id="swVersionInfo">sw <span id="swVersionTag">unknown</span></span>
+          <span id="versionInfo">app <span id="versionTag"></span></span>
+        </footer>
+      </div>
+    </div>
+
+    <!-- GPS diagnostic modal — opens from the GPS status tile -->
+    <div id="gpsModal" class="modal-overlay" hidden>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="gpsModalTitle">
+        <div class="sheet-header">
+          <h2 id="gpsModalTitle">GPS</h2>
+          <button id="gpsModalCloseBtn" class="icon-button small" type="button" aria-label="Close GPS diagnostics"><svg class="ic" viewBox="0 0 256 256" aria-hidden="true" focusable="false"><use href="icons/phosphor-sprite.svg?v=2b75f3ad12b4#ph-x"></use></svg></button>
+        </div>
+        <div class="modal-body diag-body" aria-live="polite">
+          <div class="gps-status" aria-live="polite">
+            <span id="fixSummary">No GPS fix</span>
+            <span id="fixAge" class="help"></span>
+            <span id="fixWarning" class="help"></span>
+          </div>
+          <div>
+            <label class="toggle-row"><input type="checkbox" id="gpsAllowPoorToggle" aria-describedby="gpsAllowPoorHelp"> <span>Allow logging when GPS accuracy is poor</span></label>
+            <p id="gpsAllowPoorHelp" class="help">Applies to all device GPS logging: manual capture, GPS auto-fill, and ASNAP. When off, accuracy must be within 50m. A valid fix no older than 5 minutes with known accuracy is always required.</p>
+            <p id="gpsLoggingPolicyWarning" class="help warn" role="status" hidden></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ASNAP modal — opens from the ASNAP status tile -->
+    <div id="asnapModal" class="modal-overlay" hidden>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="asnapModalTitle">
+        <div class="sheet-header">
+          <h2 id="asnapModalTitle">ASNAP Logger</h2>
+          <button id="asnapModalCloseBtn" class="icon-button small" type="button" aria-label="Close ASNAP settings"><svg class="ic" viewBox="0 0 256 256" aria-hidden="true" focusable="false"><use href="icons/phosphor-sprite.svg?v=2b75f3ad12b4#ph-x"></use></svg></button>
+        </div>
+        <div class="modal-body diag-body">
+          <section class="settings-section">
+            <h3 class="settings-h">ASNAP Logger</h3>
+            <div class="toggle-stack">
+              <label class="toggle-row"><input type="checkbox" id="asnapEnableToggle"> <span>Enable automatic ASNAP logging</span></label>
+              <label class="toggle-row"><input type="checkbox" id="asnapShowToggle"> <span>Show ASNAP events in the list</span></label>
+            </div>
+            <div class="form-field">
+              <label for="asnapIntervalSelect" class="title small">Interval</label>
+              <select id="asnapIntervalSelect">
+                <option value="60000">Every 1 minute</option>
+                <option value="120000">Every 2 minutes</option>
+                <option value="300000" selected>Every 5 minutes</option>
+                <option value="600000">Every 10 minutes</option>
+                <option value="900000">Every 15 minutes</option>
+              </select>
+            </div>
+            <p id="asnapStatus" class="help muted" role="status" aria-live="polite"></p>
+          </section>
+          <section class="settings-section">
+            <h3 class="settings-h">Backfill</h3>
+            <label class="toggle-row"><input type="checkbox" id="asnapBackfillToggle"> <span>Backfill coordinates from Sealog ASNAP before sync (phone GPS ignored)</span></label>
+            <div class="form-field">
+              <label for="asnapBackfillAllowlist" class="title small">Allowlist</label>
+              <textarea id="asnapBackfillAllowlist" rows="2" placeholder="CTD_START&#10;CTD_BOTTOM&#10;NOTE"></textarea>
+              <p class="help">Only event types matching this allowlist will be backfilled. Leave empty to backfill all.</p>
+            </div>
+            <p id="backfillStatus" class="help muted" role="status" aria-live="polite"></p>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <!-- Auto-fill rules modal — opens from the Auto-fill rules accordion -->
+    <div id="autoFillRulesModal" class="modal-overlay" hidden>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="autoFillRulesModalTitle">
+        <div class="sheet-header">
+          <h2 id="autoFillRulesModalTitle">Auto-fill rules</h2>
+          <button id="autoFillRulesModalCloseBtn" class="icon-button small" type="button" aria-label="Close auto-fill rules"><svg class="ic" viewBox="0 0 256 256" aria-hidden="true" focusable="false"><use href="icons/phosphor-sprite.svg?v=2b75f3ad12b4#ph-x"></use></svg></button>
+        </div>
+        <div class="modal-body diag-body">
+          <p class="autofill-intro">
+            Each template field can auto-fill from a source <strong>on log</strong> (when the event is created) and <strong>on edit</strong> (when the event is later updated). Existing values aren't overwritten on edit.
+          </p>
+          <div class="form-field">
+            <label for="autoFillTemplateSelect" class="title small">Template</label>
+            <select id="autoFillTemplateSelect">
+              <option value="" disabled selected>Select a template…</option>
+            </select>
+          </div>
+          <div id="autoFillStaleNotice" class="help warn" hidden></div>
+          <p class="autofill-empty" id="autoFillFieldTableEmpty">Pick a template above to configure its fields.</p>
+          <div id="autoFillFieldTableBody" class="autofill-field-list" hidden>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="autoFillRulesCancelBtn" class="secondary" type="button">Cancel</button>
+          <button id="autoFillRulesSaveBtn" type="button">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <section id="capturePanel" class="panel">
+      <div class="form-row">
+        <div id="categoryField" class="form-field field-group">
+          <span id="categoryLabel" class="title">Category</span>
+          <div id="categorySelectMount"></div>
+        </div>
+        <div id="typeField" class="form-field field-group">
+          <span id="typeLabel" class="title">Event Type</span>
+          <div id="typeSelectMount"></div>
+        </div>
+      </div>
+      <p id="gpsLoggingWarning" class="help warn" role="status" aria-live="polite" hidden></p>
+      <div id="optionFields" class="option-fields" hidden></div>
+      <div class="form-field">
+        <span id="notesLabel" class="title notes-label">Notes <span class="help" style="text-transform:none;letter-spacing:0;font-weight:400;font-size:11px;margin-left:4px;">(optional)</span></span>
+        <textarea id="notes" rows="2" placeholder="Bottle 1, Deck check, etc." aria-label="Notes (optional)"></textarea>
+      </div>
+      <div class="button-row">
+        <button id="captureBtn">Log Event</button>
+      </div>
+    </section>
+
+    <section class="panel events">
+      <div class="events-header">
+        <h2>Recent Events</h2>
+        <div class="events-actions">
+          <button id="syncBtn" class="icon-button small" type="button" aria-label="Sync queued events" title="Sync queued events"><svg class="ic" viewBox="0 0 256 256" aria-hidden="true" focusable="false"><use href="icons/phosphor-sprite.svg?v=2b75f3ad12b4#ph-arrows-clockwise"></use></svg></button>
+          <button id="exportBtn" class="icon-button small" type="button" aria-label="Export CSV" title="Export CSV"><svg class="ic" viewBox="0 0 256 256" aria-hidden="true" focusable="false"><use href="icons/phosphor-sprite.svg?v=2b75f3ad12b4#ph-download-simple"></use></svg></button>
+        </div>
+      </div>
+      <p id="syncStatus" class="help" aria-live="polite"></p>
+      <div id="eventFilterBar" class="filter-bar" role="group" aria-label="Filter cached events">
+        <button type="button" class="filter-chip" data-filter="all" aria-pressed="false">All</button>
+        <button type="button" class="filter-chip active" data-filter="local" aria-pressed="true">Local</button>
+        <button type="button" class="filter-chip" data-filter="synced" aria-pressed="false">Synced</button>
+        <button type="button" class="filter-chip" data-filter="pending" aria-pressed="false">Pending</button>
+        <button type="button" class="filter-chip" data-filter="asnap" aria-pressed="false" hidden>ASNAP</button>
+      </div>
+      <ol id="list" class="event-list" aria-live="polite"></ol>
+      <p id="emptyState" class="help">Captured events will appear here newest first.</p>
+    </section>
+  </main>
+  <div id="confirmModal" class="modal-overlay" hidden>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle" aria-describedby="confirmModalMessage">
+      <h3 id="confirmModalTitle">Confirm</h3>
+      <div class="modal-body">
+        <p id="confirmModalMessage"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="confirmModalCancel" class="secondary">Cancel</button>
+        <button type="button" id="confirmModalConfirm">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="eventEditor" class="modal-overlay" hidden>
+    <div class="modal-card has-scroll-gradient event-editor-card" role="dialog" aria-modal="true" aria-labelledby="eventEditorTitle">
+      <h3 id="eventEditorTitle">Edit Event</h3>
+      <form id="eventEditorForm">
+        <div class="form-field">
+          <label for="eventEditorTimestamp"><span class="title">Event Timestamp (UTC)</span></label>
+          <input id="eventEditorTimestamp" name="eventTimestamp" placeholder="2025-01-01T00:00:00Z" autocomplete="off">
+          <p id="eventEditorTimestampError" class="option-error" hidden></p>
+        </div>
+        <div class="form-field">
+          <label for="eventEditorLat"><span class="title">Latitude</span></label>
+          <input id="eventEditorLat" name="lat" placeholder="e.g., -45.12345" inputmode="decimal" autocomplete="off">
+        </div>
+        <div class="form-field">
+          <label for="eventEditorLon"><span class="title">Longitude</span></label>
+          <input id="eventEditorLon" name="lon" placeholder="e.g., 170.98765" inputmode="decimal" autocomplete="off">
+        </div>
+        <div class="form-field">
+          <label for="eventEditorAcc"><span class="title">Accuracy (m)</span></label>
+          <input id="eventEditorAcc" name="acc" placeholder="e.g., 5" inputmode="decimal" autocomplete="off">
+        </div>
+        <div class="form-field">
+          <label for="eventEditorNotes"><span class="title">Notes</span></label>
+          <textarea id="eventEditorNotes" name="notes" rows="3" placeholder="Update notes"></textarea>
+        </div>
+        <p id="eventEditorGpsWarning" class="help warn" role="status" aria-live="polite" hidden></p>
+        <div id="eventEditorOptions" class="option-fields"></div>
+        <div class="modal-footer">
+          <button type="button" id="eventEditorCancel" class="secondary">Cancel</button>
+          <button type="submit" id="eventEditorSave">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script src="app.js" type="module"></script>
+  <script>
+    // Apply the theme before app.js paints to prevent a color flash.
+    (function () {
+      const PRESETS = [
+        { id: 'light', name: 'Light', bg: '#f5f3f0', accent: '#4a6fa5' },
+        { id: 'honey', name: 'Honey', bg: '#0a0a0a', accent: '#d4a574' },
+        { id: 'ocean', name: 'Ocean', bg: '#0a0e14', accent: '#5ba4cf' },
+      ];
+      const PRESET_KEY = 'sealog.preset';
+
+      function getPreset(id) { return PRESETS.find(p => p.id === id) || PRESETS[0]; }
+      function storedPresetId() {
+        try {
+          const id = localStorage.getItem(PRESET_KEY);
+          return PRESETS.some(p => p.id === id) ? id : null;
+        } catch (e) { return null; }
+      }
+
+      function applyTheme(presetId, opts = {}) {
+        const preset = getPreset(presetId);
+        const apply = () => {
+          const root = document.documentElement;
+          root.dataset.preset = preset.id;
+          const meta = document.querySelector('meta[name="theme-color"]:not([media])');
+          if (meta) meta.setAttribute('content', preset.bg);
+          renderPicker(preset);
+          const statusEl = document.getElementById('themeStatus');
+          if (statusEl) statusEl.textContent = preset.name;
+        };
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const useTransition = opts.transition !== false
+          && !prefersReducedMotion
+          && typeof document.startViewTransition === 'function';
+        if (useTransition) {
+          document.startViewTransition(apply);
+        } else {
+          apply();
+        }
+        if (opts.persist !== false) {
+          try {
+            localStorage.setItem(PRESET_KEY, preset.id);
+          } catch (e) { /* ignore */ }
+        }
+      }
+
+      function renderPicker(activePreset) {
+        const ph = document.getElementById('themePresetPicker');
+        if (!ph) return;
+        ph.innerHTML = PRESETS.map(p => {
+          return `
+            <button type="button" class="preset-swatch" role="radio"
+              aria-checked="${p.id === activePreset.id}"
+              data-preset-id="${p.id}">
+              <span class="ps-preview" style="--ps-bg:${p.bg}; --ps-accent:${p.accent};" aria-hidden="true"></span>
+              <span class="ps-label">${p.name}</span>
+              <svg class="ps-check ic" viewBox="0 0 256 256" aria-hidden="true" focusable="false"><use href="icons/phosphor-sprite.svg?v=2b75f3ad12b4#ph-check"></use></svg>
+            </button>`;
+        }).join('');
+      }
+
+      // Wire delegation
+      document.addEventListener('click', (e) => {
+        const ps = e.target.closest('.preset-swatch');
+        if (ps) {
+          const presetId = ps.dataset.presetId;
+          applyTheme(presetId);
+        }
+      });
+
+      // Resolve the OS-preferred preset when the user hasn't chosen one yet.
+      // System dark → ocean, system light → light.
+      function systemPreferredPresetId() {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'ocean' : 'light';
+      }
+
+      // Boot — apply user-locked preset if present, otherwise honor OS theme.
+      function boot() {
+        const presetId = storedPresetId() || systemPreferredPresetId();
+        applyTheme(presetId, { persist: false, transition: false });
+      }
+
+      // Attach a one-time listener so OS theme flips re-apply the system-preferred
+      // preset — but only while the user hasn't locked a choice via localStorage.
+      function attachSystemThemeListener() {
+        const mq = window.matchMedia('(prefers-color-scheme: dark)');
+        mq.addEventListener('change', () => {
+          if (!storedPresetId()) applyTheme(systemPreferredPresetId(), { persist: false });
+        });
+      }
+
+      // The DOM is parsed before this script runs, so boot can access the picker.
+      boot();
+      attachSystemThemeListener();
+
+    })();
+
+    // Settings accordions. Persists per-section open state to localStorage so the
+    // user's last layout is restored next time the modal opens.
+    (function () {
+      const KEY = 'sealog.settings.accordion';
+
+      function readState() {
+        try { return JSON.parse(localStorage.getItem(KEY) || '{}') || {}; }
+        catch (e) { return {}; }
+      }
+      function writeState(state) {
+        try { localStorage.setItem(KEY, JSON.stringify(state)); }
+        catch (e) { /* ignore */ }
+      }
+      function restore() {
+        const state = readState();
+        document.querySelectorAll('details.settings-accordion').forEach((d) => {
+          const key = d.dataset.section;
+          if (!key) return;
+          if (state[key] === true) d.open = true;
+          else if (state[key] === false) d.open = false;
+          // Unstored sections retain their HTML defaults: Data/Theme open, Auto-fill closed.
+        });
+      }
+      function persist() {
+        const state = {};
+        document.querySelectorAll('details.settings-accordion').forEach((d) => {
+          const key = d.dataset.section;
+          if (key) state[key] = d.open;
+        });
+        writeState(state);
+      }
+      // Listen with capture enabled because toggle events do not bubble.
+      document.addEventListener('toggle', (e) => {
+        if (e.target && e.target.matches && e.target.matches('details.settings-accordion')) persist();
+      }, true);
+      restore();
+    })();
+  </script>
+</body>
+</html>

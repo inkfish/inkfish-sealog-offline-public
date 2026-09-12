@@ -1,0 +1,34 @@
+{
+  "output_dir": "certs/generated",
+  "file_prefix": "sealog",
+  "ca": {
+    "country": "US",
+    "state": "Example State",
+    "locality": "Example City",
+    "organization": "Example Organization",
+    "organizational_unit": "Sealog",
+    "common_name": "Sealog Local Root CA",
+    "key_bits": 4096,
+    "valid_days": 3650
+  },
+  "server": {
+    "country": "US",
+    "state": "Example State",
+    "locality": "Example City",
+    "organization": "Example Organization",
+    "organizational_unit": "Sealog",
+    "common_name": "203.0.113.10",
+    "key_bits": 2048,
+    "valid_days": 825,
+    "san_dns": [
+      "sealog.local"
+    ],
+    "san_ips": [
+      "203.0.113.10"
+    ]
+  },
+  "pkcs12": {
+    "password": "example-password"
+  },
+  "keep_csr": false
+}

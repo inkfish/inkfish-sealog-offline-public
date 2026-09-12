@@ -1,0 +1,37 @@
+{
+  "name": "sealog-offline",
+  "version": "v1.2.0.9",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=24",
+    "npm": ">=11"
+  },
+  "scripts": {
+    "icons:sync": "node scripts/sync-phosphor-icons.mjs",
+    "icons:check": "node scripts/sync-phosphor-icons.mjs --check",
+    "lint": "eslint src tests app.js sw.js update-banner.js",
+    "test": "npm run test:unit && npm run test:dom && npm run test:integration",
+    "test:unit": "node --test \"tests/unit/**/*.test.mjs\"",
+    "test:dom": "vitest run --config vitest.config.mjs",
+    "test:integration": "node --test \"tests/integration/**/*.test.mjs\"",
+    "test:e2e": "playwright test",
+    "coverage:node": "node -e \"require('node:fs').mkdirSync('coverage/node', { recursive: true })\" && node --test --experimental-test-coverage --test-reporter=spec --test-reporter=lcov --test-reporter-destination=stdout --test-reporter-destination=coverage/node/lcov.info \"tests/unit/**/*.test.mjs\"",
+    "coverage": "npm run coverage:node && vitest run --config vitest.config.mjs --coverage"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.8.0",
+    "@playwright/test": "^1.60.0",
+    "@vitest/coverage-v8": "^4.1.11",
+    "eslint": "^9.8.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-jsdoc": "^48.2.0",
+    "fake-indexeddb": "^6.0.1",
+    "globals": "^13.24.0",
+    "happy-dom": "^20.7.0",
+    "prettier": "^3.3.3",
+    "vitest": "^4.1.11"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "package": "@phosphor-icons/core",
+  "version": "2.1.1",
+  "repository": "https://github.com/phosphor-icons/core",
+  "commit": "2b75f3ad12b420c9504ef05df8d2564a28f8500e",
+  "weight": "regular",
+  "license": "MIT",
+  "files": {
+    "assets/regular/arrows-clockwise.svg": "2e80fbc9c5c37553934c9ebbd6324bf7fabe9a4b4d7c2445d99edfce55cc22df",
+    "assets/regular/caret-down.svg": "53f0cf2d0b144ac3cb07e353e0cd0853ffb3ed432d741460ce288edfcb0924b1",
+    "assets/regular/caret-right.svg": "e6dec01e074807965b7f3146b976a9b5e82c31d9c2c88aeb52e77cc2ab16c1d7",
+    "assets/regular/check.svg": "cbb89a8c42f283d4f846eb935e05d88c1be04462f16480e068c0f82b9ce40b12",
+    "assets/regular/check-circle.svg": "e02a080c3d1a758de5c5fd41abd913dec4cffbc70fe1e9637dbf7ce35f377055",
+    "assets/regular/download-simple.svg": "c48678aa09b44ba4974954690ee6cc846379c448a7214f8c802604c2a1562014",
+    "assets/regular/hourglass-high.svg": "67254e428171e99bf6d4f4592d993cd76da923bac0834238a7cd817873fe141f",
+    "assets/regular/list.svg": "fb1851842c74b40a3f42ce3d6ae0e67ede556b624218e79c0f4ead7d9ceec51f",
+    "assets/regular/pencil-simple.svg": "999530da442f44d8cf0054364373d16150f3e082c2ac294a4988a9c3a4295c28",
+    "assets/regular/warning-circle.svg": "e48a90760a68659fd3f06dd9187e471aead4877c72e915339071b2c7f7bd714c",
+    "assets/regular/x.svg": "7397b15e1fa66eaf6ff9b59fe91d483cb5c3bcf75b2fe052097ab6f0593b513a",
+    "LICENSE": "b5b1f1da112d18ea2147decfd48ddc1bf2b5aeb6c265381579340e95b15a2bb2"
+  }
+}

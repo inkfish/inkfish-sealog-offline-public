@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f5f3f0">
+  <title>Sealog Offline Deployments</title>
+  <link rel="icon" href="/favicon.ico?v=sealog-1">
+  <!--
+Theme palettes and fixed accent colors adapted from Understand-Anything.
+Source reference: https://github.com/Egonex-AI/Understand-Anything/tree/0566ea8b6b0f5e301ea125736e89568047105dd1
+See THIRD_PARTY_NOTICES.md for the source mapping and modification details.
+
+MIT License
+
+Copyright (c) 2026 Yuxiang Lin
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+  -->
+  <style>
+    :root, :root[data-preset="light"] {
+      color-scheme: light;
+      --bg:#f5f3f0; --surface:#ffffff; --surface-2:#eae7e3;
+      --line:rgba(26,26,26,0.12); --line-strong:rgba(26,26,26,0.24);
+      --ink:#1a1a1a; --ink-2:#6b6b6b; --mute:#a0a0a0;
+      --accent:#4a6fa5; --accent-fg:#ffffff; --accent-soft:rgba(74,111,165,0.10);
+    }
+    :root[data-preset="honey"] {
+      color-scheme: dark;
+      --bg:#0a0a0a; --surface:#141414; --surface-2:#1a1a1a;
+      --line:rgba(245,240,235,0.10); --line-strong:rgba(245,240,235,0.20);
+      --ink:#f5f0eb; --ink-2:#a39787; --mute:#6b5f53;
+      --accent:#d4a574; --accent-fg:#0a0a0a; --accent-soft:rgba(212,165,116,0.16);
+    }
+    :root[data-preset="ocean"] {
+      color-scheme: dark;
+      --bg:#0a0e14; --surface:#141c24; --surface-2:#1a222c;
+      --line:rgba(232,237,242,0.10); --line-strong:rgba(232,237,242,0.20);
+      --ink:#e8edf2; --ink-2:#87939f; --mute:#536b7a;
+      --accent:#5ba4cf; --accent-fg:#0a0e14; --accent-soft:rgba(91,164,207,0.16);
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; min-height: 100%; }
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font: 400 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      font-feature-settings: "ss01","cv11";
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+      padding: 32px 16px 48px;
+    }
+    main { width: min(480px, 100%); text-align: center; display: flex; flex-direction: column; gap: 8px; }
+    .eyebrow {
+      font-size: 10.5px; font-weight: 600; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--mute); margin: 0;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(24px, 4.5vw, 32px);
+      font-weight: 600; letter-spacing: -0.01em; color: var(--ink);
+    }
+    p.lede { margin: 0; font-size: 14px; color: var(--ink-2); }
+    .links { margin-top: 24px; display: grid; gap: 10px; }
+    .links a {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px;
+      border-radius: 6px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--ink);
+      text-decoration: none; font-weight: 600; font-size: 15px;
+      text-align: left;
+      transition: background 0.12s, border-color 0.12s, transform 0.05s;
+    }
+    .links a .label { display: flex; flex-direction: column; gap: 2px; align-items: flex-start; }
+    .links a .label .sub {
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      font-size: 11px; font-weight: 400; color: var(--mute);
+      letter-spacing: 0.04em; white-space: nowrap;
+    }
+    .links a .chev { color: var(--mute); font-size: 14px; transition: transform 0.15s, color 0.15s; }
+    .links a:hover { background: var(--surface-2); border-color: var(--line-strong); }
+    .links a:hover .chev { transform: translateX(2px); color: var(--accent); }
+    .links a:focus-visible {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+    .links a:active { transform: scale(0.99); }
+    footer { font-size: 11px; letter-spacing: 0.06em; color: var(--mute); text-transform: uppercase; }
+    svg.ic {
+      width: 1em; height: 1em; fill: currentColor; stroke: none;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="eyebrow">Sealog Offline</p>
+    <h1>Select a deployment</h1>
+    <p class="lede">Choose where you're logging events.</p>
+    <div class="links">
+      <a href="/sealog-a/">
+        <span class="label">Deployment A <span class="sub">sealog-a</span></span>
+        <span class="chev"><svg class="ic" viewBox="0 0 256 256" aria-hidden="true" focusable="false"><use href="icons/phosphor-sprite.svg?v=2b75f3ad12b4#ph-caret-right"></use></svg></span>
+      </a>
+      <a href="/sealog-b/">
+        <span class="label">Deployment B <span class="sub">sealog-b</span></span>
+        <span class="chev"><svg class="ic" viewBox="0 0 256 256" aria-hidden="true" focusable="false"><use href="icons/phosphor-sprite.svg?v=2b75f3ad12b4#ph-caret-right"></use></svg></span>
+      </a>
+      <a href="/sealog-c/">
+        <span class="label">Deployment C <span class="sub">sealog-c</span></span>
+        <span class="chev"><svg class="ic" viewBox="0 0 256 256" aria-hidden="true" focusable="false"><use href="icons/phosphor-sprite.svg?v=2b75f3ad12b4#ph-caret-right"></use></svg></span>
+      </a>
+    </div>
+  </main>
+  <footer>Sealog Offline &mdash; Offline-first event logging</footer>
+  <script>
+    // Match the app’s stored preset and its fixed palette.
+    // Use Light when no preference is stored.
+    (function () {
+      const PRESET_BG = {
+        'light': '#f5f3f0',
+        'honey': '#0a0a0a',
+        'ocean': '#0a0e14'
+      };
+      try {
+        const p = localStorage.getItem('sealog.preset');
+        if (p && PRESET_BG[p]) {
+          document.documentElement.dataset.preset = p;
+          const meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) meta.setAttribute('content', PRESET_BG[p]);
+        }
+      } catch (e) {}
+    })();
+  </script>
+</body>
+</html>

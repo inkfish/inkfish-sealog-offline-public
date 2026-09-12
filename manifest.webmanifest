@@ -1,0 +1,23 @@
+{
+  "name": "Sealog Offline Logger",
+  "short_name": "Sealog Logger",
+  "description": "Offline-first capture of UTC + GPS events with safe shipboard sync.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f5f3f0",
+  "theme_color": "#f5f3f0",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png?v=sealog-1",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512.png?v=sealog-1",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

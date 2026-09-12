@@ -1,0 +1,35 @@
+# Dependencies and generated test output
+node_modules/
+/coverage/
+/test-results/
+/playwright-report/
+*.log
+
+# Local release audits, archives, and analysis indexes
+/release_audit/
+/release-artifacts/
+/sealog-offline-*.tar.gz
+/SHA256SUMS
+/graphify-out/
+/.graphify/
+/.understand-anything/
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Local editor and OS files
+.DS_Store
+.idea/
+.vscode/
+
+# Local credentials and generated certificate material
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+/certs/generated/
+/certs/private-ca/cert-config.json
