@@ -104,7 +104,9 @@ SOFTWARE.
 - [Sealog Server](https://github.com/OceanDataTools/sealog-server) by Ocean Data
   Tools is the external backend this application interoperates with. Its
   [MIT license](https://github.com/OceanDataTools/sealog-server/blob/2.x/LICENSE)
-  applies to the server. Server code is not bundled here. API references are listed
+  applies to the server. A copy is included in
+  [licenses/sealog-server-MIT.txt](licenses/sealog-server-MIT.txt).
+  Server code is not bundled here. API references are listed
   in `docs/SPECIFICATION.md` in the source repository.
 - Development/test dependencies are declared in `package.json` and pinned in
   `package-lock.json`. They are not shipped as browser runtime libraries.
