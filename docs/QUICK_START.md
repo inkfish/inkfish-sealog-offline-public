@@ -4,6 +4,10 @@ This guide covers **v1.2.0.9** and assumes the app is already hosted on the ship
 
 ## 1. Open the app
 
+**First use on an iPhone or iPad with the deployment's private CA:** complete
+[iPhone/iPad certificate installation and full trust](IOS_CERTIFICATE_SETUP.md)
+before opening the app. IT may already have completed this on managed devices.
+
 1. Connect to the ship network and open the supplied HTTPS address. If the landing page lists several vessels, choose yours.
 2. Allow location access when requested. Wait for the app to finish loading before going offline. If Settings opens automatically, sign in or close it to capture while signed out.
 3. Add the vessel's app page to your Home Screen if you want to launch it like an installed app. Open Settings and check that the **app** and **sw** version labels both show **v1.2.0.9**. Disconnect, close and reopen that same app page, and capture a test event before relying on it away from the network. The deployment chooser is not the page to install or test offline.

@@ -4,6 +4,11 @@ Use this guide when operator devices must trust a private HTTPS server. It cover
 
 The helper [`scripts/generate_cert_chain.py`](../scripts/generate_cert_chain.py) creates **a new private root CA and a server certificate signed by it**. It does not install certificates, configure DNS/nginx, distribute device trust, or renew a certificate under an existing CA. If your organization already has a CA or a publicly trusted certificate service, obtain the server certificate through that service and continue at [Install the server certificate](#install-the-server-certificate).
 
+If the app and API already have HTTPS certificates trusted by operator devices,
+reuse that infrastructure; generating a new private CA is unnecessary. See
+[When existing HTTPS can simplify installation](MANUAL_UPDATE.md#when-existing-https-can-simplify-installation)
+for the app routes, API access, and device checks required when reusing a host.
+
 ## 1. Choose the address and trust model
 
 Write down the HTTPS address operators will keep using, such as `https://logs.example.test/sealog-a/` or `https://10.0.0.10/sealog-a/`. These are examples; substitute your own network address.
@@ -92,7 +97,7 @@ python3 scripts/generate_cert_chain.py -c certs/private-ca/cert-config.json
 
 Always pass `-c` with the edited configuration. Without it, the helper reads the example template. Stop if the command exits with an error. Existing output filenames cause a refusal before bundle files are written; do not add `--force` to get past an unexpected conflict. An OpenSSL failure can leave a partial bundle, so inspect the error and retry in a fresh output directory.
 
-The export password is read from the JSON and passed to the OpenSSL subprocess as a command-line argument. Use a trusted administrative session; the helper does not print the password itself.
+The export password is read from the JSON and passed to the OpenSSL subprocess as a command-line argument. Use a trusted administrative session. Successful completion output omits the password, but a failed PKCS#12 command can include it in the reported error; protect diagnostic output as well as the configuration.
 
 | Generated file | Where it belongs |
 |---|---|
@@ -210,6 +215,11 @@ Once HTTPS verification succeeds, remove the two temporary transfer copies from 
 Distribute only the root certificate, normally `sealog-root-ca.cer`, through your organization's approved channel. Confirm its identity with the recorded fingerprint. Operator devices do not need a private key, the server certificate, or the `.p12` export.
 
 ### iPhone and iPad
+
+Follow [Install the certificate on an iPhone or iPad](IOS_CERTIFICATE_SETUP.md)
+for the complete device procedure and troubleshooting. For an existing
+deployment, obtain its current root certificate from the administrator; setting
+up a device does not require generating a new CA.
 
 Apple recommends certificate deployment through MDM or Apple Configurator; certificate payloads installed through those methods receive SSL/TLS trust. Manual imports require a separate trust action. [Apple certificate-profile trust](https://support.apple.com/en-us/102390).
 

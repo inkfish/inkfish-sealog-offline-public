@@ -62,7 +62,7 @@ The worker handles same-origin GET requests and bypasses normalized `/sealog-ser
 
 Installation precaches the shell under **all** configured prefixes, not just the route being opened. Keep the routes in `sealog.conf`, `src/config/constants.js`, `sw.js`, and `landing.html` coordinated. All listed resources must be served successfully for installation to complete. See [route customization](CUSTOMIZATION.md).
 
-API calls go through `/sealog-server/...` and are proxied to the actual Sealog backend by Nginx (`sealog.conf`).
+By default, API calls use `/sealog-server/...` under the active deployment prefix. In the reference deployment, Nginx (`sealog.conf`) accepts those requests over HTTPS and proxies them to an HTTP Sealog backend. An explicit HTTPS API root can point to another server; cross-origin access requires compatible CORS. See [deployment choices and constraints](MANUAL_UPDATE.md#when-existing-https-can-simplify-installation).
 
 ---
 
@@ -75,6 +75,8 @@ The supplied `sealog.conf` is a reference layout for three backend instances beh
 - `/sealog-c/` → Deployment C (`sealog_c_upstream` on port 8200)
 
 `landing.html` directs operators to their deployment endpoint. Deployment A, B, and C are generic sample labels; customize them and their routes for the installation.
+
+The reference proxy provides a secure browser origin for the app and keeps browser API requests on HTTPS while forwarding them to HTTP backends. Another host can replace Nginx when it provides equivalent HTTPS and routing. The worker precaches root assets and all three prefixed static aliases using `cache.addAll`, so a replacement host must preserve that layout or the app and worker need coordinated changes. Cross-origin requests bypass the worker. A different same-origin API path requires updating its normalized `/sealog-server/` bypass so API GET responses are not handled as static assets. The [HTTPS deployment review](HTTPS_DEPLOYMENT_REVIEW.md) traces these requirements to source.
 
 **Vessel telemetry API resolution:** `buildAsnapVesselApiRootCandidates` in `src/runtime/api-root.js` tries an explicit `asnapVesselApiRoot` override first, then derives candidates using the Deployment A path and port 8000 before retaining the original root as a fallback. Absolute API ports from 8100 through 8999 map to 8000.
 
@@ -288,6 +290,7 @@ See [`TESTING.md`](./TESTING.md). Layered suite:
 - [`SPECIFICATION.md`](./SPECIFICATION.md) - Sealog Server API contract.
 - [`INSTALLATION.md`](./INSTALLATION.md) - Host requirements, static files, and initial installation.
 - [`CUSTOMIZATION.md`](./CUSTOMIZATION.md) - Coordinated route, template, theme, and icon changes.
+- [`HTTPS_DEPLOYMENT_REVIEW.md`](./HTTPS_DEPLOYMENT_REVIEW.md) - HTTPS hosting, proxy alternatives, and route constraints.
 - [`TROUBLESHOOTING.md`](./TROUBLESHOOTING.md) - Operator-facing troubleshooting.
 - [`QA_PLAN.md`](./QA_PLAN.md) - Field test matrix.
 - [`SECURITY.md`](./SECURITY.md) - Storage, sessions, and deployment security.

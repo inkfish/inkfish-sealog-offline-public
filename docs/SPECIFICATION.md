@@ -12,7 +12,12 @@ Use [Installation](INSTALLATION.md) for hosting and [Customization](CUSTOMIZATIO
 | Reference Deployment B route | `https://<lan-host-or-ip>/sealog-b/sealog-server` |
 | Reference Deployment C route | `https://<lan-host-or-ip>/sealog-c/sealog-server` |
 
-Local deployments should sit behind an HTTPS reverse proxy so the PWA can call the API from the same secure origin.
+The reference deployment uses an HTTPS reverse proxy to expose its configured HTTP
+Sealog upstreams on the PWA's HTTPS origin. Existing HTTPS hosting and an HTTPS API
+can replace that proxy if the required app/worker routes are available and the API
+permits cross-origin requests where needed. Enabling HTTPS on the API alone does
+not secure the app's own origin or satisfy CORS. See [deployment choices and current routing constraints](MANUAL_UPDATE.md#when-existing-https-can-simplify-installation)
+and the [HTTPS deployment review](HTTPS_DEPLOYMENT_REVIEW.md).
 
 The curl examples below run from an administrator's terminal against a test
 deployment. Set `BASE` to your API root and `TOKEN` to the token returned by a

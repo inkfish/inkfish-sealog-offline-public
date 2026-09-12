@@ -38,6 +38,14 @@ Serve the app over trusted HTTPS using the exact address operators will reopen. 
 
 The reference proxy terminates TLS and sends requests to its configured Sealog upstreams over HTTP. Protect that proxy-to-backend network separately, or adapt the upstream connection to your deployment's secured transport. Keep backend ports reachable only by their intended clients and verify each upstream's identity/address before entering credentials.
 
+Suitable existing HTTPS infrastructure can replace the reference nginx deployment
+if it serves the PWA's required static routes and provides compatible HTTPS API
+access. HTTPS on the API alone does not secure an HTTP-hosted app. A different
+API origin also needs working CORS for the client's JSON requests and bearer
+headers; TLS does not grant that access. See [deployment choices](MANUAL_UPDATE.md#when-existing-https-can-simplify-installation)
+and the [HTTPS deployment review](HTTPS_DEPLOYMENT_REVIEW.md) before changing the
+app address, API routes, or proxy.
+
 The `apiRoot` preference overrides `window.API_ROOT` and the default vessel route. `asnapVesselApiRoot` can override the vessel-telemetry source, which receives the same stored bearer token. Both preferences persist through sign-out. Clear test overrides before operator use and inspect browser network requests to confirm the resolved login, event, and telemetry endpoints. See [Customization](CUSTOMIZATION.md) for configuration locations.
 
 The worker skips non-GET requests, cross-origin requests, and GET paths that normalize to `/sealog-server/`. Those exclusions cover the reference API routes. If you configure a different **same-origin API prefix**, update the worker's exclusion as part of that change; otherwise its GET responses can be handled as cached static assets. Changing an API root alone does not update the worker's routing rules.

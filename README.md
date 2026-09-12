@@ -31,9 +31,10 @@ Screenshots use demonstration data.
 - **Capture offline.** Log events without a server connection. The app retains pending records and keeps synced records for review. **Settings → Data → Clear Cached Events…** removes only synced records.
 - **Use server templates.** Templates provide event types, required fields, and choices. Cached templates work offline; built-in CTD and note templates are available when no server templates are loaded.
 - **Auto-fill fields.** Use **Settings → Auto-fill rules → Manage rules…** to fill a field from the current time or GPS when logging or editing. New template configurations get **On log** defaults for recognized GPS field names, such as Latitude and Longitude. Saved choices, including **—** (no source) and edit-only rules, are preserved. **Save** applies changes immediately; edit rules fill only empty fields.
+- **Control GPS accuracy.** The GPS dialog's **Allow logging when GPS accuracy is poor** setting applies whenever device GPS is used for manual capture, GPS auto-fill, or ASNAP. Accuracy must be 50 metres or better unless the override is enabled, which displays a persistent warning. Missing or invalid fixes, unknown accuracy, and fixes older than five minutes are always rejected.
 - **Review and edit.** Expand an event card to see its details. Edit ordinary events before or after syncing; synced edits are sent on the next sync. Automated ASNAP records are read-only on the device.
 - **Sync and import.** Sync runs automatically when possible, with retries for failed requests. **Sync queued events** starts a manual attempt; **Load Sealog Events** retrieves records from the active cruise.
-- **Record automated GPS snapshots.** Optional ASNAP logging captures positions at a chosen interval while the app can run. It needs a location fix; by default, it also waits for a fresh fix with accuracy of 50 metres or better. Keep the app open for reliable interval logging.
+- **Record automated GPS snapshots.** Optional ASNAP logging captures positions at a chosen interval while signed in and applies the shared GPS accuracy policy. Keep the app open for reliable interval logging.
 - **Use server positions.** Optional ASNAP backfill fills coordinates for selected event types from surrounding server position records. Affected uploads wait when the required position data is unavailable.
 - **Export CSV.** Download the events stored on the current device for review or IT support.
 
@@ -47,6 +48,8 @@ Screenshots use demonstration data.
 
 Operators: use the HTTPS address supplied by your ship's IT team and follow the [Quick Start](docs/QUICK_START.md). Keep that same address when reopening the app so you return to the device's saved records.
 
+On an iPhone or iPad using the deployment's private CA, first follow [certificate installation and full trust](docs/IOS_CERTIFICATE_SETUP.md), unless IT has already configured device trust.
+
 Administrators: start with [Install the application](docs/INSTALLATION.md), the complete workstation-to-device walkthrough. It covers prerequisites, certificate installation, static files, nginx, backend routing, and acceptance checks. There is no application build step or automated server installer.
 
 1. [Customize your deployment](docs/CUSTOMIZATION.md): choose names, addresses, backend routes, icons, themes, and template defaults.
@@ -55,6 +58,8 @@ Administrators: start with [Install the application](docs/INSTALLATION.md), the 
 4. For subsequent deployments, follow [Manual updates and rollback](docs/MANUAL_UPDATE.md).
 
 The [reference nginx configuration](sealog.conf) serves one app directory at `/srv/sealog-offline` through three example paths. Paths on the same origin share browser storage, including the queue and login; use the [customization guide's storage guidance](docs/CUSTOMIZATION.md#storage-is-shared-within-an-origin) when setting up independent deployments.
+
+The reference proxy provides HTTPS for the app and forwards its API requests to HTTP Sealog backends. Existing infrastructure can replace it when it supplies trusted HTTPS hosting, the supported static routes, and compatible API access. HTTPS on the API alone is insufficient: the app also needs HTTPS, and an API on another origin needs compatible CORS. See the [deployment choices](docs/MANUAL_UPDATE.md#when-existing-https-can-simplify-installation) and [HTTPS deployment review](docs/HTTPS_DEPLOYMENT_REVIEW.md).
 
 ## Updating
 
@@ -84,6 +89,7 @@ Open `http://localhost:8000`. This previews the UI; the app's offline worker reg
 | Doc | For |
 |---|---|
 | [`docs/QUICK_START.md`](docs/QUICK_START.md) | Operators - daily logging workflow |
+| [`docs/IOS_CERTIFICATE_SETUP.md`](docs/IOS_CERTIFICATE_SETUP.md) | Operators and IT - private CA installation and full trust on an iPhone or iPad |
 | [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md) | Watch leads - triage GPS / auth / sync / storage |
 | [`docs/INSTALLATION.md`](docs/INSTALLATION.md) | Administrators - complete first installation and device acceptance |
 | [`docs/CUSTOMIZATION.md`](docs/CUSTOMIZATION.md) | Administrators and developers - names, routes, backends, icons, themes, and defaults |
@@ -93,6 +99,7 @@ Open `http://localhost:8000`. This previews the UI; the app's offline worker reg
 | [`docs/TESTING.md`](docs/TESTING.md) | Developers - local test suite |
 | [`docs/RELEASE.md`](docs/RELEASE.md) | Release managers - validate and package a release |
 | [`docs/MANUAL_UPDATE.md`](docs/MANUAL_UPDATE.md) | Administrators - transfer, update, and roll back the static app |
+| [`docs/HTTPS_DEPLOYMENT_REVIEW.md`](docs/HTTPS_DEPLOYMENT_REVIEW.md) | Administrators and developers - HTTPS hosting, proxy alternatives, and route constraints |
 | [`docs/QA_PLAN.md`](docs/QA_PLAN.md) | QA - field scenario matrix |
 | [`docs/SECURITY.md`](docs/SECURITY.md) | Security reviewers - storage, sessions, and deployment |
 

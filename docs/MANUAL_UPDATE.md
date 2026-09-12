@@ -1,6 +1,6 @@
 # Manual updates and rollback
 
-This guide deploys **v1.2.0.9** from a workstation using rsync. The production server does not need Git, Node.js, npm, or the test suite. There is no application build step and no automated server installer in this repository.
+This guide deploys **v1.2.0.9** from a workstation using rsync. Serving this static client does not require Git, Node.js, npm, or the test suite on the production host; Sealog Server has its own backend requirements. There is no application build step and no automated server installer in this repository.
 
 For a new host, start with [Installation](INSTALLATION.md), which covers DNS,
 certificates, nginx, backends, and device trust. Return here when that guide asks
@@ -8,7 +8,76 @@ you to copy the static app. For source changes, use [Customization](CUSTOMIZATIO
 before staging the files; downloading an uncustomized release will not include
 your local changes.
 
+## Why the reference deployment uses nginx
+
+The supplied [nginx configuration](../sealog.conf) serves the app over HTTPS and
+accepts API requests at the same HTTPS origin, then forwards them to the Sealog
+backends over HTTP on the server network. For example, a browser request to
+`https://logs.example.test/sealog-a/sealog-server/api/v1/events` is forwarded to
+`http://203.0.113.40:8000/sealog-server/api/v1/events`. Substitute the deployment's
+actual addresses; these are examples.
+
+The app's own address needs trusted HTTPS for its service worker and device GPS.
+Giving only the API an HTTPS address does not make an HTTP-hosted app a secure
+context. An HTTPS app's requests to an ordinary HTTP API are normally blocked as
+mixed content. In the reference setup, the browser uses HTTPS for both; the HTTP
+leg is inside nginx and remains unencrypted, so the deployment must protect that
+network separately. Same-origin API routing also avoids browser CORS requirements.
+See the [HTTPS deployment review](HTTPS_DEPLOYMENT_REVIEW.md) for browser
+requirements, local-development exceptions, and the scope of verification.
+
+## When existing HTTPS can simplify installation
+
+**Nginx itself is optional.** Reuse an existing HTTPS host if it can serve the app
+and provide compatible API access. An API already serving trusted HTTPS may
+remove the need for the reference HTTP-to-HTTPS proxy; the static app still needs
+its own HTTPS hosting. Choose the arrangement supported by the deployed server:
+
+| Available infrastructure | Deployment approach |
+|---|---|
+| Sealog API is HTTP-only | Use the reference nginx layout or an equivalent HTTPS host and reverse proxy. |
+| Existing HTTPS host can serve the app and route API requests at the same origin | Reuse that host and routing. |
+| Sealog API has trusted HTTPS at a different origin | Host the app over HTTPS and configure a direct HTTPS API root, with CORS support on the API. |
+
+An origin includes the scheme, hostname, and port: `https://logs.example.test`
+and `https://logs.example.test:8000` are different origins. Before replacing the
+reference hosting, verify the following:
+
+1. **App paths and offline installation.** This release registers its worker under
+   `/sealog-a/`, `/sealog-b/`, or `/sealog-c/`. Its precache fetches root assets and
+   all three static aliases, even if only one backend is used. Preserve these
+   routes, file types, and worker scopes, or follow the coordinated path changes
+   in [Customization](CUSTOMIZATION.md#rename-add-or-remove-deployment-paths).
+2. **API selection.** Set `window.API_ROOT` before `app.js` executes, or use the
+   administrator's per-device localStorage `apiRoot` override. An explicit root
+   such as `https://api.example.test:8000/sealog-server` stops before `/api/v1`,
+   which the client appends. Bare hostnames/IP addresses become HTTP. Saved
+   overrides take precedence and survive sign-out; Settings has no API-root
+   control. See [API overrides](CUSTOMIZATION.md#override-the-event-api-only-when-needed).
+3. **Cross-origin access.** A separate HTTPS API must allow the app origin,
+   unauthenticated `OPTIONS` preflights, and the client's GET, POST, and PATCH
+   requests with `Authorization` and JSON `Content-Type`. Verify login, reads,
+   uploads, and edits in a browser; curl does not verify browser CORS. For
+   same-origin APIs, retain `/sealog-server/` after the supported deployment prefix
+   (or at the root), or update the worker's API-cache exclusion for the new path.
+4. **Vessel backfill.** If enabled, its position API must also be reachable over
+   trusted HTTPS and accept the user's token. The current resolver derives
+   Deployment A and port-8000 candidates. The `asnapVesselApiRoot` override is
+   tried first and retains fallbacks; review [ASNAP routing](CUSTOMIZATION.md#asnap-vessel-position-routing)
+   and verify backfill separately from event sync.
+5. **Optional diagnostics.** The reference nginx host provides
+   `/<deployment-prefix>/debug/asnap-backfill` on the app origin. Provide an
+   equivalent receiver only if server-side snapshot logging is wanted; its
+   absence does not block normal sync.
+
+Preserve an existing app origin when changing hosting. Device queues and settings
+do not automatically move to a different scheme, hostname, or port. An API origin
+can change independently, provided it is the intended backend for queued records.
+
 ## Server layout and prerequisites
+
+The commands below use the reference nginx layout. For another HTTPS host, use
+its web root and configuration procedure while preserving the requirements above.
 
 The transfer requires SSH access and rsync on both machines. The remote account
 needs sudo access to install files under `/srv` and manage nginx when required.
@@ -25,7 +94,7 @@ Before a first installation, an administrator must:
 
 1. Provide the Sealog Server instances the app will use. They are separate services, not included in this repository.
 2. Install and configure nginx. Adapt the example's hostnames/IP addresses, upstream addresses and ports, certificate paths, and logging settings to the deployment. The `203.0.113.*` addresses are placeholders. The example uses upstream ports 8000, 8100, and 8200 for the three routes.
-3. Configure HTTPS with a certificate trusted by operator devices. See [certificate setup](cert-generation.md) for a private CA deployment and [security](SECURITY.md) for storage and logging considerations.
+3. Configure HTTPS with a certificate trusted by operator devices. For a private CA deployment, use [certificate setup](cert-generation.md) for the server and [iPhone/iPad certificate installation and full trust](IOS_CERTIFICATE_SETUP.md) for each device. Copying the app files does not install device trust. See [security](SECURITY.md) for storage and logging considerations.
 4. Keep the configured app paths consistent with `landing.html`, `sw.js`, and the supported prefixes in `src/config/constants.js`. The manifest's start URL and scope are already relative. Review ASNAP source routing and test helpers when changing paths; [Customization](CUSTOMIZATION.md#rename-add-or-remove-deployment-paths) lists every dependent file.
 
 The commands below assume `/srv/sealog-offline` is a regular directory. Set `web_root` to the actual installation path if different. If it is a release symlink, use the installation's existing release-switch procedure instead.
@@ -170,6 +239,11 @@ unrecognized files rather than deciding for you what belongs to the app.
 For a static update, no nginx reload is needed. After installing or changing nginx configuration separately, run `sudo nginx -t` and reload nginx only if validation succeeds.
 
 ## Verify the update
+
+For a first installation or hosting change, also verify trusted HTTPS on an
+operator device, successful service-worker activation, GPS permission and capture,
+login, sync, and an edit that reaches the API. Check the browser console for
+certificate, mixed-content, and CORS errors. Exercise vessel backfill if enabled.
 
 From a workstation that trusts the production HTTPS certificate, replace the example origin:
 

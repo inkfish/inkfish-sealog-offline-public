@@ -20,6 +20,8 @@ The override warning on the capture page and in the GPS dialog stays visible unt
 
 Check that location services are enabled and that the browser or installed app has permission for this site. After changing permission, reload the app and try again. If the address is not HTTPS or the browser shows a certificate warning, ask IT to check the deployment.
 
+For an iPhone or iPad using the deployment's private CA, follow [certificate installation and full trust](IOS_CERTIFICATE_SETUP.md); downloading the certificate alone is insufficient.
+
 **The fix is stale**
 
 Bring the app to the foreground while you have a clear view of the sky. Check whether the fix age updates. A capture with GPS auto-fill requests a location fix, but the app can use a cached fix if the new request fails. The cached fix must still meet the GPS policy: a fix more than five minutes old is rejected even with the poor-accuracy override enabled.
