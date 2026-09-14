@@ -1,0 +1,29 @@
+services:
+  sealog-offline:
+    build: .
+    ports:
+      - "8080:80"
+    extra_hosts:
+      # Docker Desktop (Mac/Windows) already resolves host.docker.internal;
+      # this entry makes it resolve on Linux too, so the same nginx.conf
+      # reaches Sealog Server instances running on the host at
+      # localhost:8000/8100/8200.
+      - "host.docker.internal:host-gateway"
+    volumes:
+      # Bind-mount only the same curated runtime files the Dockerfile copies,
+      # so edits show up on refresh with no rebuild. Never bind-mount the
+      # whole repo: docs/INSTALLATION.md and docs/SECURITY.md both call out
+      # that nginx must not be pointed at the source checkout, since it would
+      # also serve tests/, docs/, .git/, and any locally generated
+      # certs/private-ca material.
+      - ./index.html:/srv/sealog-offline/index.html:ro
+      - ./landing.html:/srv/sealog-offline/landing.html:ro
+      - ./app.js:/srv/sealog-offline/app.js:ro
+      - ./update-banner.js:/srv/sealog-offline/update-banner.js:ro
+      - ./sw.js:/srv/sealog-offline/sw.js:ro
+      - ./manifest.webmanifest:/srv/sealog-offline/manifest.webmanifest:ro
+      - ./favicon.ico:/srv/sealog-offline/favicon.ico:ro
+      - ./src:/srv/sealog-offline/src:ro
+      - ./icons:/srv/sealog-offline/icons:ro
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    restart: unless-stopped

@@ -82,6 +82,14 @@ python3 -m http.server 8000
 
 Open `http://localhost:8000`. This previews the UI; the app's offline worker registers only under a supported vessel path. Use the [testing guide](docs/TESTING.md) and reference HTTPS routing for full offline, GPS, and backend testing. See [Architecture](docs/ARCHITECTURE.md) for code and storage organization, and [Specification](docs/SPECIFICATION.md) for the server API contract.
 
+To exercise the offline worker itself — installation, caching, and offline reload — run the app under a supported vessel path with Docker instead:
+
+```bash
+docker compose up --build
+```
+
+Open `http://localhost:8080/sealog-a/` (or `-b`/`-c`). `http://localhost` is a secure context, so the service worker installs without a certificate. `docker-compose.yml` bind-mounts the app's runtime files, so edits appear on refresh with no rebuild. Sign-in and sync need a real Sealog Server: point one at `localhost:8000`, `8100`, or `8200` on the host — `docker/nginx.conf` proxies each deployment path there — or skip it and use the app signed out, offline. See [`docker/nginx.conf`](docker/nginx.conf) for the routing.
+
 ---
 
 ## Documentation
