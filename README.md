@@ -88,7 +88,11 @@ To exercise the offline worker itself — installation, caching, and offline rel
 docker compose up --build
 ```
 
-Open `http://localhost:8080/sealog-a/` (or `-b`/`-c`). `http://localhost` is a secure context, so the service worker installs without a certificate. `docker-compose.yml` bind-mounts the app's runtime files, so edits appear on refresh with no rebuild. Sign-in and sync need a real Sealog Server: point one at `localhost:8000`, `8100`, or `8200` on the host — `docker/nginx.conf` proxies each deployment path there — or skip it and use the app signed out, offline. See [`docker/nginx.conf`](docker/nginx.conf) for the routing.
+Open `http://localhost:8080/sealog-a/` (or `-b`/`-c`). Localhost is a secure context, so the service worker installs without a certificate. Compose publishes the app on host loopback and bind-mounts its runtime files, so edits appear on refresh with no rebuild. If port 8080 is occupied, run `SEALOG_DEV_PORT=8081 docker compose up --build` and open port 8081. Stop the container with `docker compose down`.
+
+Sign-in and sync need a real Sealog Server on host port 8000, 8100, or 8200 for deployments A, B, or C. [`docker/nginx.conf`](docker/nginx.conf) proxies those requests through `host.docker.internal`. Docker Desktop can reach host loopback listeners. On native Linux, bind the backend to a container-reachable host interface, such as the Docker bridge gateway, and allow traffic from the container network; a backend listening only on `127.0.0.1` is unreachable. Without a backend, the app can still be used signed out and offline.
+
+With Docker running and the [test prerequisites](docs/TESTING.md#prerequisites) installed, `npm run test:docker` checks the built image and Compose setup, including all three API proxies and offline reopening. It needs free host ports 8000, 8100, and 8200 for temporary mock backends; stop local Sealog Servers before running it.
 
 ---
 
