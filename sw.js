@@ -4,7 +4,7 @@
  * assets) or network-first (JS source) strategies.
  */
 
-import { normalizePath, buildCacheKeys, isNetworkFirstAssetPath } from './src/sw/helpers.js';
+import { normalizePath, buildCacheKeys, isNetworkFirstAssetPath, isAppShellResponse } from './src/sw/helpers.js';
 
 const CACHE_VERSION = 'v1.2.0.9';
 /** @type {string} Full cache key combining the prefix and version. */
@@ -154,9 +154,10 @@ self.addEventListener('message', (event) => {
 });
 
 /**
- * Handle a navigation request with network-first strategy. On success,
- * caches the response under all index.html variants. On failure, cascades
- * through cache candidates and returns a 503 as a last resort.
+ * Handle a navigation request with network-first strategy. Only the app
+ * shell itself refreshes the cached index.html variants; other responses
+ * pass through uncached. On failure, cascades through cache candidates and
+ * returns a 503 as a last resort.
  * @param {Request} request - Original navigation request from the fetch event.
  * @param {string} normalizedPath - Normalized request pathname.
  * @param {URL} url - Parsed request URL used to derive cache fallbacks.
@@ -165,9 +166,10 @@ self.addEventListener('message', (event) => {
 async function handleNavigationRequest(request, normalizedPath, url) {
   try {
     const response = await fetch(request);
-    if (!response || response.type === 'opaqueredirect') {
+    if (!isAppShellResponse(normalizedPath, response)) {
       return response;
     }
+    // Every deployment serves the same shell, so one refresh updates them all.
     const copy = response.clone();
     const cache = await caches.open(CACHE_NAME);
     await cache.put('/index.html', copy.clone());

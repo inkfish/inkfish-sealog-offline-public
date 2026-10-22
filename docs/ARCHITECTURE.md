@@ -54,7 +54,7 @@ The app is a single-page app rendered entirely client-side.
    - Wires all event listeners - capture, sync, export, edit, filter, modal opens, visibility changes.
    - Renders the event list, status strip, settings, modals.
    - Owns account/diagnostic dialog events and shared scroll locking; there is no global UI controller API.
-3. **`sw.js`** registers as a module worker, imports shared cache helpers, and precaches the complete app shell and imported modules on install with HTTP cache bypass, then activates and claims clients. Fetches use network-first for navigations and JavaScript source assets, with cached responses for offline use; other static assets use cache-first. Activation broadcasts `SW_STATE` and, for an update, `SW_UPDATE_READY`.
+3. **`sw.js`** registers as a module worker, imports shared cache helpers, and precaches the complete app shell and imported modules on install with HTTP cache bypass, then activates and claims clients. Fetches use network-first for navigations and JavaScript source assets, with cached responses for offline use; other static assets use cache-first. Only a successful same-origin HTML response for an app entry path replaces the cached shell, so a navigation to an icon, script, or error route cannot break offline launch. Activation broadcasts `SW_STATE` and, for an update, `SW_UPDATE_READY`.
 
 Worker registration runs only under `/sealog-a/`, `/sealog-b/`, or `/sealog-c/`. A simple server opened at `/index.html` is a UI preview and does not exercise offline installation. The prefixed Playwright server covers the actual worker lifecycle.
 

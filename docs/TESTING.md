@@ -70,7 +70,7 @@ These integration tests compose exported helpers. They do not bootstrap `app.js`
 ### Browser
 
 - `ui-behavior.spec.mjs`: tests covering themes, settings, event cards, responsive layouts, resources, authentication failures, GPS status, and the rules modal's Save/Cancel/persistence behavior.
-- `offline-sync.spec.mjs`: tests covering prefixed worker registration/control, cached offline reload, a worker-version update, and capture/queue/POST synchronization.
+- `offline-sync.spec.mjs`: tests covering prefixed worker registration/control, cached offline reload, offline launch of every vessel path after non-app navigations, a worker-version update, and capture/queue/POST synchronization.
 - `landing.spec.mjs`: deployment links.
 - `auto-fill.spec.mjs`: actual offline capture, empty-only edit rules, and uploaded time/GPS option values.
 - `gps-logging-policy.spec.mjs`: universal GPS accuracy and freshness checks, override persistence, empty-only edit fills, and cancellation of pending GPS operations.

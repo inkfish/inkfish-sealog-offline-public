@@ -35,9 +35,16 @@ const ROOT = resolve(import.meta.dirname, '..', '..');
 let swVersionOverride = null;
 let swScriptRevision = 0;
 let deferWorkerActivation = false;
+// Browser offline emulation does not reliably reach the worker after the
+// first offline navigation, so tests that need it refuse connections instead.
+let serverUnreachable = false;
 
 test.beforeAll(async () => {
   server = createServer(async (req, res) => {
+    if (serverUnreachable) {
+      req.socket.destroy();
+      return;
+    }
     let pathname = decodeURIComponent(req.url.split('?')[0]);
     const requestPrefix = PREFIXES.find((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)) || '';
     for (const pre of PREFIXES) {
@@ -92,6 +99,7 @@ test.beforeEach(() => {
   swVersionOverride = null;
   swScriptRevision = 0;
   deferWorkerActivation = false;
+  serverUnreachable = false;
 });
 
 /**
@@ -173,6 +181,29 @@ test('app shell loads from cache when offline', async ({ browser }) => {
   await expect(page.locator('#emptyState')).toBeVisible();
 
   await ctx.setOffline(false);
+  await ctx.close();
+});
+
+test('non-app navigations leave every deployment offline shell intact', async ({ browser }) => {
+  const { ctx, page } = await freshAppPage(browser);
+  for (const prefix of PREFIXES) {
+    await page.goto(`${baseURL}${prefix}/`);
+    await waitForSwControl(page);
+  }
+  // Every deployment shares one cache, so a navigation under one scope
+  // could previously replace the shell for all three.
+  const icon = await page.goto(`${baseURL}${PREFIX}/icons/icon-192.png`);
+  expect(icon.headers()['content-type']).toBe('image/png');
+  expect((await page.goto(`${baseURL}${PREFIX}/missing-route`)).status()).toBe(404);
+
+  serverUnreachable = true;
+  for (const prefix of PREFIXES) {
+    for (const entry of ['/', '/index.html']) {
+      const response = await page.goto(`${baseURL}${prefix}${entry}`);
+      expect(response.fromServiceWorker()).toBe(true);
+      await expect(page.locator('#menuBtn')).toBeVisible();
+    }
+  }
   await ctx.close();
 });
 

@@ -61,7 +61,7 @@ The worker skips non-GET requests, cross-origin requests, and GET paths that nor
 | `localStorage.username` / `userId` | Display identity and attribution | Explicit sign-out removes both; some unauthorized-response paths leave identity values. |
 | Other `localStorage` preferences | Theme, auto-fill rules, ASNAP settings, API overrides | Persist across sign-out and app updates. |
 | `localStorage.asnapBackfillDebugSnapshot` | Latest full backfill diagnostic snapshot, including sampled telemetry/context | Overwritten by later snapshots; sign-out does not remove it. |
-| Service-worker Cache Storage | Same-origin app/static responses handled by the worker | Activation removes older app caches. Reference Sealog API routes bypass this cache. |
+| Service-worker Cache Storage | Same-origin app/static responses handled by the worker | Activation removes older app caches. Reference Sealog API routes bypass this cache. Only a successful same-origin HTML response for an app entry path replaces the cached offline app page. |
 | CSV exports | Event records from the exporting device | Remain as downloaded files until removed outside the app; protect them like the original records. |
 
 Confirm ingestion before removing synced records. Clearing site data or uninstalling the PWA can remove unsynced records; neither is a normal app-update or certificate-trust step. Use [Manual updates](MANUAL_UPDATE.md) to preserve device data during deployment.
