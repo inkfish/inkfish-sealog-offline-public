@@ -6,7 +6,7 @@ Run the relevant suites before merging and the full suite before a release. This
 
 - Node.js 24 or later and npm 11 or later, as required by `package.json`.
 - Install the locked development dependencies with `npm ci` from the repository root.
-- DOM tests and coverage use Vitest and `@vitest/coverage-v8` 4.1.11, as pinned in `package-lock.json`.
+- DOM tests and coverage use Vitest and `@vitest/coverage-v8` 4.1.12, as pinned in `package-lock.json`.
 - Install the browser used by the suite with `npx playwright install chromium`. On Linux, `npx playwright install --with-deps chromium` also installs system dependencies.
 - Docker smoke tests also need a running Docker Engine or Docker Desktop with Compose, and free host ports 8000, 8100, and 8200 for temporary mock backends.
 
