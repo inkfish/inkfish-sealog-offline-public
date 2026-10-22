@@ -74,7 +74,7 @@ These integration tests compose exported helpers. They do not bootstrap `app.js`
 - `landing.spec.mjs`: deployment links.
 - `auto-fill.spec.mjs`: actual offline capture, empty-only edit rules, and uploaded time/GPS option values.
 - `gps-logging-policy.spec.mjs`: universal GPS accuracy and freshness checks, override persistence, empty-only edit fills, and cancellation of pending GPS operations.
-- `server-import.spec.mjs`: current server records, verbatim notes, refresh/persistence, retained backfill metadata, and UUID deduplication using supported API queries.
+- `server-import.spec.mjs`: current server records, verbatim notes, refresh/persistence, retained backfill metadata, UUID deduplication using supported API queries, and inert handling of unsafe imported IDs.
 - `sync-verification.spec.mjs`: missing insert IDs, exact UUID confirmation, failed lookups, bounded retries, duplicate matches, auxiliary upload, and edits during recovery.
 
 The browser suite uses Chromium and mocked API/geolocation responses. It does not establish physical GPS quality, mobile Safari behavior, certificate trust, or compatibility with a live server. Use [QA_PLAN.md](QA_PLAN.md) for those checks, including first-use GPS defaults and immediate changes after saving rules.

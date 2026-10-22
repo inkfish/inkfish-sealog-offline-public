@@ -245,7 +245,9 @@ GPS fields are not guaranteed for templates or saved rules that do not capture t
 The richer JSON object it keeps locally (`buildEventFreeText`) is used for
 local payload synchronization and CSV export. Imported `event_free_text` remains
 a plain note, including text that happens to look like JSON. IDs come from `id`,
-event times from `ts`, and the local UUID from the `client_uuid` event option.
+event times from `ts`, and the local ID from the `client_uuid` event option when it
+is 1 to 64 letters, digits, hyphens, or underscores. Otherwise the event is stored
+as `server-<id>`.
 
 **Successful response used for the new event ID**
 

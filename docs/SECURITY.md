@@ -100,4 +100,6 @@ The repository ignores the default generated directory, the exact local certific
 
 `client_uuid` values combine a time prefix with randomness from `crypto.getRandomValues`. They identify and deduplicate records; they are not authentication credentials or access-control tokens.
 
+An imported event's `client_uuid` becomes its local ID only when it is 1 to 64 letters, digits, hyphens, or underscores; any other value is replaced by `server-<id>`. The event list also escapes every ID it writes into markup, so a value stored by an earlier version cannot inject HTML.
+
 The browser runtime has no npm production dependencies. Contributor tools are locked in `package-lock.json`; install with `npm ci` and run `npm audit --include=dev --audit-level=moderate` when preparing a release. Recheck the current lockfile because advisories can change. Follow the [release checklist](RELEASE.md), including asset verification and the [third-party notices](../THIRD_PARTY_NOTICES.md).

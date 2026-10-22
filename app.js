@@ -34,7 +34,7 @@ import {
 } from './src/config/constants.js';
 import { nowUtc, ensureIsoString, normalizeUtcInput, toIsoOrNull, formatMinutes, formatDuration, formatUtc, describeRelativeTime } from './src/utils/time.js';
 import { toNumberOrNull, numbersEqual } from './src/utils/numbers.js';
-import { generateLocalId } from './src/utils/identifiers.js';
+import { generateLocalId, isSafeLocalId } from './src/utils/identifiers.js';
 import { sleep } from './src/utils/async.js';
 import { truncateText } from './src/utils/strings.js';
 import {
@@ -893,8 +893,10 @@ async function refreshServerEvents({ showStatus = true } = {}) {
       continue;
     }
 
-    const localId = findOptionValue(optionValues, CLIENT_UUID_OPTION_KEY) || `server-${serverIdStr}`;
-    if (byLocalId.has(localId)) continue;
+    const clientUuid = findOptionValue(optionValues, CLIENT_UUID_OPTION_KEY);
+    // Server data becomes the local ID only when it matches the local ID grammar.
+    const localId = isSafeLocalId(clientUuid) ? clientUuid : `server-${serverIdStr}`;
+    if (!isSafeLocalId(localId) || byLocalId.has(localId)) continue;
     const createdMs = new Date(eventTimestampIso).getTime();
     const syncedMs = Date.now();
     const eventRecord = {
@@ -5656,13 +5658,13 @@ function renderEvent(event) {
     actions = '<p class="help muted">ASNAP events are read-only and cannot be edited from this device.</p>';
   } else {
     const buttons = [
-      `<button type="button" class="secondary small edit-event" data-id="${event.localId}">Edit</button>`
+      `<button type="button" class="secondary small edit-event" data-id="${escapeHtml(event.localId)}">Edit</button>`
     ];
     if (deletable) {
-      buttons.push(`<button type="button" class="danger small delete-event" data-id="${event.localId}">Delete</button>`);
+      buttons.push(`<button type="button" class="danger small delete-event" data-id="${escapeHtml(event.localId)}">Delete</button>`);
     }
     if (canForceRepost) {
-      buttons.push(`<button type="button" class="danger small force-repost" data-id="${event.localId}">Force Re-Post</button>`);
+      buttons.push(`<button type="button" class="danger small force-repost" data-id="${escapeHtml(event.localId)}">Force Re-Post</button>`);
     }
     actions = `<div class="event-actions">${buttons.join('')}</div>`;
   }
@@ -5686,8 +5688,8 @@ function renderEvent(event) {
   const eventClass = isAsnap ? 'event-card asnap' : 'event-card';
 
   return (
-    `<li class="${eventClass}" data-id="${event.localId}" data-sync-state="${event.syncState}" data-expanded="false">
-      <button type="button" class="event-summary" data-id="${event.localId}" aria-expanded="false">
+    `<li class="${eventClass}" data-id="${escapeHtml(event.localId)}" data-sync-state="${escapeHtml(event.syncState)}" data-expanded="false">
+      <button type="button" class="event-summary" data-id="${escapeHtml(event.localId)}" aria-expanded="false">
         <div class="event-summary-main">
           <div class="event-summary-top">
             <span class="event-title">${escapeHtml(displayName || 'Event')}</span>
