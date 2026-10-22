@@ -40,7 +40,8 @@ jobs:
       - run: npm run test:integration
 
   e2e:
-    runs-on: ubuntu-latest
+    # Playwright 1.60 cannot install Chromium on the ubuntu 26.04 image.
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     needs: build
     name: e2e current
