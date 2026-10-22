@@ -10,8 +10,10 @@ node_modules/
 /release-artifacts/
 /sealog-offline-*.tar.gz
 /SHA256SUMS
+/.codegraph/
 /graphify-out/
 /.graphify/
+/.graphifyignore
 /.understand-anything/
 
 # Python bytecode

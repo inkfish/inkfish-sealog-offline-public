@@ -17,6 +17,7 @@
     "test:dom": "vitest run --config vitest.config.mjs",
     "test:integration": "node --test \"tests/integration/**/*.test.mjs\"",
     "test:e2e": "playwright test",
+    "test:docker": "node tests/docker/run.mjs",
     "coverage:node": "node -e \"require('node:fs').mkdirSync('coverage/node', { recursive: true })\" && node --test --experimental-test-coverage --test-reporter=spec --test-reporter=lcov --test-reporter-destination=stdout --test-reporter-destination=coverage/node/lcov.info \"tests/unit/**/*.test.mjs\"",
     "coverage": "npm run coverage:node && vitest run --config vitest.config.mjs --coverage"
   },

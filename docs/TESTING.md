@@ -8,6 +8,7 @@ Run the relevant suites before merging and the full suite before a release. This
 - Install the locked development dependencies with `npm ci` from the repository root.
 - DOM tests and coverage use Vitest and `@vitest/coverage-v8` 4.1.11, as pinned in `package-lock.json`.
 - Install the browser used by the suite with `npx playwright install chromium`. On Linux, `npx playwright install --with-deps chromium` also installs system dependencies.
+- Docker smoke tests also need a running Docker Engine or Docker Desktop with Compose, and free host ports 8000, 8100, and 8200 for temporary mock backends.
 
 Tests, Node packages, and test runners stay on contributor machines and CI. The production app is served directly as static files.
 
@@ -33,6 +34,7 @@ These commands run from the repository root. Browser specs start their own tempo
 | `npm run test:integration` | Node test runner + fake-indexeddb | Composed event transforms, sync state, storage, and interrupted-request recovery |
 | `npm test` | Unit + DOM + integration | All non-browser tests |
 | `npm run test:e2e` | Playwright / Chromium | Actual browser behavior, including capture/edit, import, and offline sync |
+| `npm run test:docker` | Docker Compose + Playwright / Chromium | Built image and bind-mounted Compose runtime, all three nginx/API routes, worker installation, and offline reload |
 | `npm run coverage:node` | Native Node coverage | Unit-suite text output and `coverage/node/lcov.info` |
 | `npm run coverage` | Unit coverage, then DOM coverage | Runs native Node and Vitest V8 reports in separate directories; it does not merge their coverage |
 | `npm audit --include=dev --audit-level=moderate` | Dependency audit | Fails for known moderate-or-higher issues, including development dependencies |
@@ -107,7 +109,9 @@ Use `--workers=1` on a browser command when investigating failures caused by res
 
 ## Verifying customization and installation
 
-For route or worker changes, run `offline-sync.spec.mjs` and `landing.spec.mjs`, then repeat installation and offline reopening on the intended origin. The worker precaches every configured route; a missing route or a missing JavaScript module can prevent installation even if the landing page loads. The tests cannot validate paths that exist only in an external nginx configuration.
+For route or worker changes, run `offline-sync.spec.mjs`, `landing.spec.mjs`, and `npm run test:docker`, then repeat installation and offline reopening on the intended origin. The worker precaches every configured route; a missing route or a missing JavaScript module can prevent installation even if the landing page loads. Docker tests validate `docker/nginx.conf`; production nginx routes still require deployment checks.
+
+The Docker runner uses a unique Compose project and an automatically assigned loopback port. It starts mock HTTP backends on ports 8000, 8100, and 8200, checks nginx syntax, and runs the browser smoke suite against Compose and a separate container using only the built image. It removes its containers, network, image, and mock listeners when the run finishes. It does not require a real Sealog Server; live authentication, upload permissions, and GPS remain separate checks.
 
 For template or auto-fill changes, run the auto-fill unit suite plus `auto-fill.spec.mjs` and the rules-modal checks in `ui-behavior.spec.mjs`. For theme changes, verify all three presets and the landing page. For icon changes, run both integrity commands in the table and inspect the smallest favicon and largest app icon. [Customization](CUSTOMIZATION.md) lists the files that must change together.
 
@@ -115,7 +119,7 @@ Certificate generation, nginx syntax, device trust, and live API permissions are
 
 ## Automation
 
-This repository does not include a hosted CI workflow. To configure one, use the supported Node/npm versions above, install with `npm ci`, and run dependency audit, Phosphor and app-icon integrity, lint, unit, DOM, integration, and browser checks. Install Chromium and its system dependencies on the runner before app-icon and browser checks.
+The [CI workflow](../.github/workflows/ci.yml) runs on pushes and pull requests. Its current and LTS Node jobs install locked dependencies, audit them, check Phosphor assets, lint, and run unit, DOM, and integration tests. After those jobs pass, Node 24 jobs run the browser suite and Docker smoke suite with Chromium. App-icon integrity remains a separate local/release check. Pull requests from first-time fork contributors may require a maintainer to approve the workflow run before jobs start.
 
 Dependencies are development-only; audit them because these tools execute on contributor machines and automated runners. Review check results before release.
 
