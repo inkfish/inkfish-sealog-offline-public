@@ -99,7 +99,7 @@ async function openApp(browser, { gps = {}, signedIn = true, frozen = false, sav
     await dialog.accept();
   });
   if (frozen) {
-    await page.clock.install({ time: CLOCK_TIME });
+    await page.clock.install({ time: new Date(CLOCK_TIME.getTime() - 60_000) });
     await page.clock.pauseAt(CLOCK_TIME);
   }
   await page.route('**/api/v1/**', async (route) => {
@@ -435,3 +435,65 @@ for (const [description, gps] of [
     }
   });
 }
+
+test('a fix stamped ahead of the device clock is current for capture and ASNAP', async ({ browser }) => {
+  // Off the ship network, location services can stamp fixes from GPS time ahead of the unsynced device clock.
+  const { page, context, dialogs } = await openApp(browser, { gps: { accuracy: 5, ageMs: -30000 }, frozen: true });
+  try {
+    await page.locator('#type').selectOption({ label: 'GPS Capture' });
+    await page.locator('#captureBtn').click();
+    await expect.poll(async () => (await readEvents(page)).length).toBe(1);
+    expect(optionsOf((await readEvents(page))[0])).toMatchObject({ Latitude: '12.123456', Longitude: '-68.654321', Accuracy: '5' });
+
+    await page.locator('#asnapStatusTile').click();
+    await page.locator('#asnapIntervalSelect').selectOption('60000');
+    await page.locator('#asnapEnableToggle').check();
+    await page.locator('#asnapModalCloseBtn').click();
+    await page.clock.runFor(10000);
+    await expect.poll(async () => (await readEvents(page)).filter((event) => event.isAsnap).length).toBe(1);
+    expect(dialogs).toEqual([]);
+  } finally {
+    await context.close();
+  }
+});
+
+test('the GPS log records fixes against the phone clock and errors, survives a reload, and copies', async ({ browser }) => {
+  const { page, context } = await openApp(browser, { gps: { accuracy: 5, ageMs: -30000 }, frozen: true });
+  try {
+    await page.locator('#type').selectOption({ label: 'GPS Capture' });
+    await page.locator('#captureBtn').click();
+    await expect.poll(async () => (await readEvents(page)).length).toBe(1);
+    await page.evaluate(() => { window.testGps.unavailable = true; });
+    await page.locator('#captureBtn').click();
+    await expect.poll(async () => (await readEvents(page)).length).toBe(2);
+
+    await page.locator('#gpsStatus').click();
+    const entries = page.locator('#gpsLogList li');
+    await expect(entries.first()).toHaveText(
+      '2026-09-12 12:00:00Z capture: error: Unable to determine location; used saved fix from 0s ago, usable'
+    );
+    await expect(entries.nth(1)).toHaveText('2026-09-12 12:00:00Z capture: ±5m, fix time 30.0 s ahead of phone clock, usable');
+    await expect(entries.last()).toContainText('warm-up: ±5m, fix time 30.0 s ahead of phone clock, usable');
+
+    await page.evaluate(() => {
+      Object.defineProperty(navigator, 'clipboard', {
+        value: { writeText: async (text) => { window.copiedGpsLog = text; } },
+        configurable: true
+      });
+    });
+    await page.locator('#gpsLogCopyBtn').click();
+    const count = await entries.count();
+    await expect(page.locator('#gpsLogStatus')).toHaveText(`Copied ${count} entries.`);
+    const copied = (await page.evaluate(() => window.copiedGpsLog)).split('\n');
+    expect(copied[0]).toMatch(/^Sealog Offline v[\d.]+ GPS log, copied 2026-09-12T12:00:00\.\d{3}Z$/);
+    expect(copied.slice(1)).toEqual(await entries.allTextContents());
+
+    await context.setOffline(false);
+    await page.reload();
+    await expect(page.locator('#type option', { hasText: /^GPS Capture$/ })).toHaveCount(1);
+    await page.locator('#gpsStatus').click();
+    await expect(page.locator('#gpsLogList li', { hasText: 'capture: error: Unable to determine location' })).toHaveCount(1);
+  } finally {
+    await context.close();
+  }
+});

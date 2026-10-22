@@ -131,6 +131,16 @@ const SAMPLE_EVENTS = [
   },
 ];
 
+// GPS log entries, oldest first; the live warm-up fix is appended after load.
+const SAMPLE_GPS_LOG = [
+  { at: now - 6 * 60 * 1000, trigger: 'warm-up', fixTime: now - 6 * 60 * 1000 - 300, acc: 5, result: 'usable' },
+  { at: now - 5 * 60 * 1000, trigger: 'ASNAP', fixTime: now - 5 * 60 * 1000 - 400, acc: 4, result: 'usable' },
+  { at: now - 4 * 60 * 1000, trigger: 'capture', fixTime: now - 4 * 60 * 1000 - 200, acc: 4, result: 'usable' },
+  { at: now - 3 * 60 * 1000, trigger: 'warm-up', error: 'Timed out waiting for GPS' },
+  { at: now - 2 * 60 * 1000, trigger: 'ASNAP', fixTime: now - 2 * 60 * 1000 + 1400, acc: 6, result: 'usable' },
+  { at: now - 60 * 1000, trigger: 'warm-up', fixTime: now - 60 * 1000 - 300, acc: 4, result: 'usable' }
+];
+
 async function seedIdb(page, events) {
   await page.evaluate(async (events) => {
     const { put } = await import(new URL('src/db/indexed-db.js', location.href).href);
@@ -160,11 +170,12 @@ async function setupContext(browser) {
   return ctx;
 }
 
-async function newPage(ctx, { authed = true, seed = true } = {}) {
+async function newPage(ctx, { authed = true, seed = true, gpsLog = null } = {}) {
   const page = await ctx.newPage();
-  await page.addInitScript(({ authed }) => {
+  await page.addInitScript(({ authed, gpsLog }) => {
     try {
       localStorage.setItem('sealog.preset', 'light');
+      if (gpsLog) localStorage.setItem('gpsDiagnosticsLog', JSON.stringify(gpsLog));
       if (authed) {
         localStorage.setItem('jwt', 'stub-jwt');
         localStorage.setItem('username', 'navigator');
@@ -177,7 +188,7 @@ async function newPage(ctx, { authed = true, seed = true } = {}) {
     } catch {
       // Ignore storage access errors in the fixture initialization script.
     }
-  }, { authed });
+  }, { authed, gpsLog });
   await page.goto(APP_URL);
   await page.waitForFunction(() => !!navigator.serviceWorker.controller);
   await page.waitForTimeout(400);
@@ -261,12 +272,18 @@ async function main() {
 
     // GPS modal.
     {
-      const page = await newPage(ctx);
+      const page = await newPage(ctx, { gpsLog: SAMPLE_GPS_LOG });
       await page.waitForTimeout(1500);
       await page.click('#gpsStatus');
       await page.waitForSelector('#gpsModal:not([hidden])', { timeout: 5000 });
+      await page.locator('#gpsAllowPoorToggle').check();
+      await page.waitForSelector('#gpsLoggingPolicyWarning:not([hidden])');
       await page.waitForTimeout(400);
       await shoot(page, '04-gps-modal');
+      await page.locator('#gpsAllowPoorToggle').uncheck();
+      await page.evaluate(() => document.getElementById('gpsLogTitle').scrollIntoView({ block: 'start' }));
+      await page.waitForTimeout(300);
+      await shoot(page, '12-gps-log');
       await page.close();
     }
 

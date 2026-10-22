@@ -49,6 +49,20 @@ export function buildCacheKeys(normalizedPath, search = '') {
   return Array.from(keys);
 }
 
+/**
+ * Decide whether a navigation response may replace the cached app shell.
+ * Navigations can also reach icons, scripts, and error routes in scope, so
+ * only a successful same-origin HTML response for an app entry path counts.
+ * @param {string} normalizedPath - Already normalized via normalizePath.
+ * @param {Response} [response] - Network response for the navigation.
+ * @returns {boolean} True when the response is the app shell.
+ */
+export function isAppShellResponse(normalizedPath, response) {
+  if (normalizedPath !== '/index.html' || !response) return false;
+  if (response.status !== 200 || response.type !== 'basic') return false;
+  return /^text\/html\s*(?:;|$)/i.test(response.headers.get('Content-Type') || '');
+}
+
 /** Paths that bypass cache-first to get fresh code on reload. */
 const NETWORK_FIRST_STATIC_PATHS = new Set([
   '/app.js',

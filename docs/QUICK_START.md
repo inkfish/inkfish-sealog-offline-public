@@ -1,6 +1,6 @@
 # Quick Start
 
-This guide covers **v1.2.0.9** and assumes the app is already hosted on the ship network. Your IT team supplies the HTTPS address and Sealog account details. For server setup, see [Installation](INSTALLATION.md); for replacing a deployed release, see [Manual Update](MANUAL_UPDATE.md).
+This guide covers **v1.2.0.10** and assumes the app is already hosted on the ship network. Your IT team supplies the HTTPS address and Sealog account details. For server setup, see [Installation](INSTALLATION.md); for replacing a deployed release, see [Manual Update](MANUAL_UPDATE.md).
 
 ## 1. Open the app
 
@@ -10,7 +10,7 @@ before opening the app. IT may already have completed this on managed devices.
 
 1. Connect to the ship network and open the supplied HTTPS address. If the landing page lists several vessels, choose yours.
 2. Allow location access when requested. Wait for the app to finish loading before going offline. If Settings opens automatically, sign in or close it to capture while signed out.
-3. Add the vessel's app page to your Home Screen if you want to launch it like an installed app. Open Settings and check that the **app** and **sw** version labels both show **v1.2.0.9**. Disconnect, close and reopen that same app page, and capture a test event before relying on it away from the network. The deployment chooser is not the page to install or test offline.
+3. Add the vessel's app page to your Home Screen if you want to launch it like an installed app. Open Settings and check that the **app** and **sw** version labels both show **v1.2.0.10**. Disconnect, close and reopen that same app page, and capture a test event before relying on it away from the network. The deployment chooser is not the page to install or test offline.
 
 Use the same address and browser or installed app to return to your saved records. If the browser reports a certificate warning, ask IT to check the connection. A trusted HTTPS connection is needed for GPS and the offline app installation.
 
@@ -48,7 +48,7 @@ The top of the app shows four status tiles. Read the message as well as its colo
 | **ASNAP** | Whether automated snapshots are on, off, or paused, and whether sign-in or a GPS fix is needed. |
 | **Queue** | How many stored events still need syncing, out of the total on the device. |
 
-Tap **GPS** for coordinates, accuracy, fix age, and the poor-accuracy setting. Tap **ASNAP** for automatic logging and backfill controls. The message below **Recent Events** reports sync results and errors.
+Tap **GPS** for coordinates, accuracy, fix age, the poor-accuracy setting, and the GPS log. Tap **ASNAP** for automatic logging and backfill controls. The message below **Recent Events** reports sync results and errors.
 
 ![GPS dialog showing coordinates, accuracy, fix age, and the enabled poor-accuracy warning](screenshots/04-gps-modal.png)
 
@@ -57,6 +57,10 @@ In **GPS**, **Allow logging when GPS accuracy is poor** controls every new devic
 With it off, recording a new device GPS fix requires accuracy of 50 metres or better. Turn it on to allow less accurate fixes; a warning stays visible on the capture page and in the GPS dialog while it is enabled. It never permits a missing fix, invalid coordinates, unknown accuracy, or a fix more than five minutes old.
 
 Notes-only capture and edits that retain saved GPS values do not need a new fix. This setting does not affect coordinates supplied by Sealog server backfill.
+
+If GPS logging fails, screenshot the **GPS log** at the bottom of the GPS dialog, or tap **Copy log**, and send it to IT. The log lists recent GPS requests on this device and contains no coordinates. [Troubleshooting](TROUBLESHOOTING.md) explains how to read it.
+
+![GPS log listing recent warm-up, capture, and ASNAP fixes with a timeout error and Copy log button](screenshots/12-gps-log.png)
 
 ## 5. Capture an event
 

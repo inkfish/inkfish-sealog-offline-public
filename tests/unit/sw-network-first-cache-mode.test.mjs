@@ -7,6 +7,18 @@ const CACHE_NAME = `sealog-offline-${CACHE_VERSION}`;
 let workerInstance = 0;
 
 /**
+ * Build a same-origin network response as the worker sees it.
+ * @param {string} body - Response body.
+ * @param {object} [init] - Response status and headers.
+ * @returns {Response} A response whose type is 'basic'.
+ */
+function basicResponse(body, init = { status: 200 }) {
+  const response = new Response(body, init);
+  Object.defineProperty(response, 'type', { value: 'basic' });
+  return response;
+}
+
+/**
  * Run the actual worker with in-memory browser APIs, including its imports.
  * @param {object} t - Node test context.
  * @returns {Promise<object>} Worker handlers and observed cache operations.
@@ -49,12 +61,11 @@ async function loadWorker(t) {
     keys: async () => [CACHE_NAME, 'sealog-offline-previous', 'unrelated-cache'],
     delete: async (name) => { deletedCaches.push(name); return true; }
   };
+  let respond = () => basicResponse('current asset');
   globalThis.fetch = async (request) => {
     fetches.push(request);
     if (offline) throw new TypeError('Network unavailable');
-    const response = new Response('current asset', { status: 200 });
-    Object.defineProperty(response, 'type', { value: 'basic' });
-    return response;
+    return respond(request);
   };
   globalThis.self = {
     location: { origin: ORIGIN },
@@ -70,6 +81,7 @@ async function loadWorker(t) {
   return {
     listeners, entries, deletedCaches, broadcasts, fetches, installedRequests,
     setOffline: () => { offline = true; },
+    setNetworkResponse: (handler) => { respond = handler; },
     isClaimed: () => claimed,
     isSkippedWaiting: () => skippedWaiting
   };
@@ -116,4 +128,41 @@ test('worker precaches the deployed shell and activates an update without deleti
     { type: 'SW_STATE', version: CACHE_VERSION, isUpdate: true },
     { type: 'SW_UPDATE_READY', version: CACHE_VERSION, isUpdate: true }
   ]);
+});
+
+test('only a successful HTML entry navigation replaces the offline shell for every deployment', async (t) => {
+  const worker = await loadWorker(t);
+  const navigate = (path) => {
+    let response;
+    const request = { method: 'GET', mode: 'navigate', url: `${ORIGIN}${path}` };
+    worker.listeners.get('fetch')({ request, respondWith: (pending) => { response = pending; } });
+    return response;
+  };
+  const shellKeys = ['/index.html', ...['/sealog-a', '/sealog-b', '/sealog-c']
+    .flatMap((prefix) => [`${prefix}/`, `${prefix}/index.html`])]
+    .map((key) => `${ORIGIN}${key}`);
+  const html = { 'Content-Type': 'text/html; charset=utf-8', 'X-Shell': 'current' };
+
+  worker.setNetworkResponse(() => basicResponse('shell', { status: 200, headers: html }));
+  await navigate('/sealog-b/');
+  assert.deepEqual(shellKeys.map((key) => worker.entries.get(key)?.headers.get('X-Shell')), shellKeys.map(() => 'current'));
+  const shell = new Map(shellKeys.map((key) => [key, worker.entries.get(key)]));
+
+  for (const [path, status, headers] of [
+    ['/sealog-a/icons/icon-192.png', 200, { 'Content-Type': 'image/png' }],
+    ['/sealog-a/app.js', 200, { 'Content-Type': 'application/javascript' }],
+    ['/sealog-a/missing-route', 404, { 'Content-Type': 'text/html' }],
+    ['/sealog-c/', 503, { 'Content-Type': 'text/html' }]
+  ]) {
+    worker.setNetworkResponse(() => basicResponse('not the app', { status, headers }));
+    const response = await navigate(path);
+    assert.equal(response.status, status);
+    assert.equal(await response.text(), 'not the app');
+    for (const key of shellKeys) assert.equal(worker.entries.get(key), shell.get(key), `${path} replaced ${key}`);
+  }
+
+  worker.setOffline();
+  for (const path of ['/sealog-a/', '/sealog-b/index.html', '/sealog-c/']) {
+    assert.equal((await navigate(path)).headers.get('X-Shell'), 'current');
+  }
 });

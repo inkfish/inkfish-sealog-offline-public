@@ -1,6 +1,6 @@
 {
   "name": "sealog-offline",
-  "version": "v1.2.0.9",
+  "version": "v1.2.0.10",
   "private": true,
   "license": "MIT",
   "type": "module",
@@ -24,7 +24,7 @@
   "devDependencies": {
     "@eslint/js": "^9.8.0",
     "@playwright/test": "^1.60.0",
-    "@vitest/coverage-v8": "^4.1.11",
+    "@vitest/coverage-v8": "^4.1.12",
     "eslint": "^9.8.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.29.1",
@@ -33,6 +33,6 @@
     "globals": "^13.24.0",
     "happy-dom": "^20.7.0",
     "prettier": "^3.3.3",
-    "vitest": "^4.1.11"
+    "vitest": "^4.1.12"
   }
 }

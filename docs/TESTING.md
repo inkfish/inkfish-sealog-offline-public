@@ -1,12 +1,12 @@
 # Automated Testing Guide
 
-Run the relevant suites before merging and the full suite before a release. This guide matches the v1.2.0.9 scripts and configuration. Test totals are printed by each runner; the suite targets the current storage, browser, and Sealog API contracts.
+Run the relevant suites before merging and the full suite before a release. This guide matches the v1.2.0.10 scripts and configuration. Test totals are printed by each runner; the suite targets the current storage, browser, and Sealog API contracts.
 
 ## Prerequisites
 
 - Node.js 24 or later and npm 11 or later, as required by `package.json`.
 - Install the locked development dependencies with `npm ci` from the repository root.
-- DOM tests and coverage use Vitest and `@vitest/coverage-v8` 4.1.11, as pinned in `package-lock.json`.
+- DOM tests and coverage use Vitest and `@vitest/coverage-v8` 4.1.12, as pinned in `package-lock.json`.
 - Install the browser used by the suite with `npx playwright install chromium`. On Linux, `npx playwright install --with-deps chromium` also installs system dependencies.
 - Docker smoke tests also need a running Docker Engine or Docker Desktop with Compose, and free host ports 8000, 8100, and 8200 for temporary mock backends.
 
@@ -72,11 +72,11 @@ These integration tests compose exported helpers. They do not bootstrap `app.js`
 ### Browser
 
 - `ui-behavior.spec.mjs`: tests covering themes, settings, event cards, responsive layouts, resources, authentication failures, GPS status, and the rules modal's Save/Cancel/persistence behavior.
-- `offline-sync.spec.mjs`: tests covering prefixed worker registration/control, cached offline reload, a worker-version update, and capture/queue/POST synchronization.
+- `offline-sync.spec.mjs`: tests covering prefixed worker registration/control, cached offline reload, offline launch of every vessel path after non-app navigations, a worker-version update, and capture/queue/POST synchronization.
 - `landing.spec.mjs`: deployment links.
 - `auto-fill.spec.mjs`: actual offline capture, empty-only edit rules, and uploaded time/GPS option values.
-- `gps-logging-policy.spec.mjs`: universal GPS accuracy and freshness checks, override persistence, empty-only edit fills, and cancellation of pending GPS operations.
-- `server-import.spec.mjs`: current server records, verbatim notes, refresh/persistence, retained backfill metadata, and UUID deduplication using supported API queries.
+- `gps-logging-policy.spec.mjs`: universal GPS accuracy and freshness checks, override persistence, empty-only edit fills, cancellation of pending GPS operations, fixes stamped ahead of the phone clock, and the GPS log.
+- `server-import.spec.mjs`: current server records, verbatim notes, refresh/persistence, retained backfill metadata, UUID deduplication using supported API queries, and inert handling of unsafe imported IDs.
 - `sync-verification.spec.mjs`: missing insert IDs, exact UUID confirmation, failed lookups, bounded retries, duplicate matches, auxiliary upload, and edits during recovery.
 
 The browser suite uses Chromium and mocked API/geolocation responses. It does not establish physical GPS quality, mobile Safari behavior, certificate trust, or compatibility with a live server. Use [QA_PLAN.md](QA_PLAN.md) for those checks, including first-use GPS defaults and immediate changes after saving rules.

@@ -33,9 +33,18 @@ const ROOT = resolve(import.meta.dirname, '..', '..');
 
 // Override worker source and reported version for the update-notification fixture.
 let swVersionOverride = null;
+let swScriptRevision = 0;
+let deferWorkerActivation = false;
+// Browser offline emulation does not reliably reach the worker after the
+// first offline navigation, so tests that need it refuse connections instead.
+let serverUnreachable = false;
 
 test.beforeAll(async () => {
   server = createServer(async (req, res) => {
+    if (serverUnreachable) {
+      req.socket.destroy();
+      return;
+    }
     let pathname = decodeURIComponent(req.url.split('?')[0]);
     const requestPrefix = PREFIXES.find((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)) || '';
     for (const pre of PREFIXES) {
@@ -66,6 +75,13 @@ test.beforeAll(async () => {
         )
       );
     }
+    if (pathname === '/sw.js') {
+      let source = body.toString('utf8');
+      if (deferWorkerActivation) {
+        source = source.replace('await self.skipWaiting();', '// Wait for the page to request activation.');
+      }
+      body = Buffer.from(`${source}\n// Test build revision: ${swScriptRevision}\n`);
+    }
     res.setHeader('Content-Type', mime);
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Service-Worker-Allowed', `${requestPrefix}/`);
@@ -81,6 +97,9 @@ test.afterAll(async () => {
 
 test.beforeEach(() => {
   swVersionOverride = null;
+  swScriptRevision = 0;
+  deferWorkerActivation = false;
+  serverUnreachable = false;
 });
 
 /**
@@ -105,15 +124,18 @@ async function freshAppPage(browser) {
 }
 
 /**
- * Wait until the active service worker has claimed this page.
+ * Wait until the service worker has activated, claimed this page, and
+ * reported its version, before attempting another registration update.
  * @param {object} page - Playwright page under test.
  * @returns {Promise<void>} Resolves once the SW controller is set.
  */
 async function waitForSwControl(page) {
   await page.waitForFunction(
-    () => !!(navigator.serviceWorker && navigator.serviceWorker.controller),
+    () => navigator.serviceWorker.controller?.state === 'activated',
+    null,
     { timeout: 20000 }
   );
+  await expect(page.locator('#swVersionTag')).toHaveText(CACHE_VERSION);
 }
 
 for (const prefix of PREFIXES) {
@@ -136,6 +158,11 @@ for (const prefix of PREFIXES) {
     });
     expect(scope).toBe(`${baseURL}${prefix}/`);
 
+    // Initial installation can briefly expose a waiting worker. It must not
+    // queue the delayed, versionless notification used for genuine updates.
+    await page.waitForTimeout(1200);
+    await expect(page.locator('#updateBanner')).toBeHidden();
+
     await ctx.close();
   });
 }
@@ -157,6 +184,29 @@ test('app shell loads from cache when offline', async ({ browser }) => {
   await ctx.close();
 });
 
+test('non-app navigations leave every deployment offline shell intact', async ({ browser }) => {
+  const { ctx, page } = await freshAppPage(browser);
+  for (const prefix of PREFIXES) {
+    await page.goto(`${baseURL}${prefix}/`);
+    await waitForSwControl(page);
+  }
+  // Every deployment shares one cache, so a navigation under one scope
+  // could previously replace the shell for all three.
+  const icon = await page.goto(`${baseURL}${PREFIX}/icons/icon-192.png`);
+  expect(icon.headers()['content-type']).toBe('image/png');
+  expect((await page.goto(`${baseURL}${PREFIX}/missing-route`)).status()).toBe(404);
+
+  serverUnreachable = true;
+  for (const prefix of PREFIXES) {
+    for (const entry of ['/', '/index.html']) {
+      const response = await page.goto(`${baseURL}${prefix}${entry}`);
+      expect(response.fromServiceWorker()).toBe(true);
+      await expect(page.locator('#menuBtn')).toBeVisible();
+    }
+  }
+  await ctx.close();
+});
+
 test('a new worker version surfaces the update banner', async ({ browser }) => {
   const { ctx, page } = await freshAppPage(browser);
   await page.goto(`${baseURL}${PREFIX}/`);
@@ -173,6 +223,65 @@ test('a new worker version surfaces the update banner', async ({ browser }) => {
 
   await expect(page.locator('#updateBanner')).toBeVisible({ timeout: 15000 });
   await expect(page.locator('#updateBannerText')).toContainText(swVersionOverride);
+
+  await page.locator('#updateDismissBtn').click();
+  // Another real installation reporting the same version must respect the
+  // dismissal, even when both the delayed fallback and worker messages fire.
+  swScriptRevision += 1;
+  await page.evaluate(async () => {
+    const controlled = new Promise((resolve) => {
+      navigator.serviceWorker.addEventListener('controllerchange', resolve, { once: true });
+    });
+    const reg = await navigator.serviceWorker.getRegistration();
+    await reg.update();
+    await controlled;
+  });
+  await page.waitForTimeout(1200);
+  await expect(page.locator('#updateBanner')).toBeHidden();
+
+  swVersionOverride = swVersionOverride.replace(/\d+$/, (part) => String(Number(part) + 1));
+  await page.evaluate(async () => {
+    const reg = await navigator.serviceWorker.getRegistration();
+    await reg.update();
+  });
+  await expect(page.locator('#updateBanner')).toBeVisible();
+  await expect(page.locator('#updateBannerText')).toContainText(swVersionOverride);
+
+  await ctx.close();
+});
+
+test('an update waiting behind an active worker prompts for reload', async ({ browser }) => {
+  const { ctx, page } = await freshAppPage(browser);
+  await page.goto(`${baseURL}${PREFIX}/`);
+  await waitForSwControl(page);
+
+  swVersionOverride = CACHE_VERSION.replace(/\d+$/, (part) => String(Number(part) + 1));
+  deferWorkerActivation = true;
+  await page.evaluate(async () => {
+    const reg = await navigator.serviceWorker.getRegistration();
+    await reg.update();
+  });
+  await page.waitForFunction(async () => {
+    const reg = await navigator.serviceWorker.getRegistration();
+    return !!reg?.waiting && !!reg.active;
+  });
+
+  // A state reply from the old active worker still matches this page's
+  // version, but cannot erase the update that genuinely remains waiting.
+  await page.evaluate(async () => {
+    const reg = await navigator.serviceWorker.getRegistration();
+    await new Promise((resolve) => {
+      const onState = (event) => {
+        if (event.data?.type !== 'SW_STATE') return;
+        navigator.serviceWorker.removeEventListener('message', onState);
+        resolve();
+      };
+      navigator.serviceWorker.addEventListener('message', onState);
+      reg.active.postMessage({ type: 'REQUEST_SW_STATE' });
+    });
+  });
+  await expect(page.locator('#updateBanner')).toBeVisible({ timeout: 5000 });
+  await expect(page.locator('#updateBannerText')).toContainText('A newer version');
 
   await ctx.close();
 });

@@ -1,6 +1,6 @@
 # Security and deployment boundaries
 
-These notes describe the v1.2.0.9 app and reference [`sealog.conf`](../sealog.conf). Use them when configuring [installation](INSTALLATION.md), [certificates](cert-generation.md), and shared operator devices. The app is a static browser client; Sealog Server provides accounts, permissions, and the server-side record store.
+These notes describe the v1.2.0.10 app and reference [`sealog.conf`](../sealog.conf). Use them when configuring [installation](INSTALLATION.md), [certificates](cert-generation.md), and shared operator devices. The app is a static browser client; Sealog Server provides accounts, permissions, and the server-side record store.
 
 ## Reporting a vulnerability
 
@@ -59,9 +59,10 @@ The worker skips non-GET requests, cross-origin requests, and GET paths that nor
 | IndexedDB `meta` | Cruise context and template-sync metadata | Updated during use. Sign-out clears the saved cruise ID/start/stop context. |
 | `localStorage.jwt` | Bearer token | Explicit sign-out or the applicable unauthorized-response handler. |
 | `localStorage.username` / `userId` | Display identity and attribution | Explicit sign-out removes both; some unauthorized-response paths leave identity values. |
+| `localStorage.gpsDiagnosticsLog` | The newest 1,000 GPS requests: times, trigger, accuracy, errors, and results, without coordinates | Persists across sign-out and app updates; older entries drop off as new ones arrive. |
 | Other `localStorage` preferences | Theme, auto-fill rules, ASNAP settings, API overrides | Persist across sign-out and app updates. |
 | `localStorage.asnapBackfillDebugSnapshot` | Latest full backfill diagnostic snapshot, including sampled telemetry/context | Overwritten by later snapshots; sign-out does not remove it. |
-| Service-worker Cache Storage | Same-origin app/static responses handled by the worker | Activation removes older app caches. Reference Sealog API routes bypass this cache. |
+| Service-worker Cache Storage | Same-origin app/static responses handled by the worker | Activation removes older app caches. Reference Sealog API routes bypass this cache. Only a successful same-origin HTML response for an app entry path replaces the cached offline app page. |
 | CSV exports | Event records from the exporting device | Remain as downloaded files until removed outside the app; protect them like the original records. |
 
 Confirm ingestion before removing synced records. Clearing site data or uninstalling the PWA can remove unsynced records; neither is a normal app-update or certificate-trust step. Use [Manual updates](MANUAL_UPDATE.md) to preserve device data during deployment.
@@ -99,5 +100,7 @@ The repository ignores the default generated directory, the exact local certific
 ## Dependency and release checks
 
 `client_uuid` values combine a time prefix with randomness from `crypto.getRandomValues`. They identify and deduplicate records; they are not authentication credentials or access-control tokens.
+
+An imported event's `client_uuid` becomes its local ID only when it is 1 to 64 letters, digits, hyphens, or underscores; any other value is replaced by `server-<id>`. The event list also escapes every ID it writes into markup, so a value stored by an earlier version cannot inject HTML.
 
 The browser runtime has no npm production dependencies. Contributor tools are locked in `package-lock.json`; install with `npm ci` and run `npm audit --include=dev --audit-level=moderate` when preparing a release. Recheck the current lockfile because advisories can change. Follow the [release checklist](RELEASE.md), including asset verification and the [third-party notices](../THIRD_PARTY_NOTICES.md).

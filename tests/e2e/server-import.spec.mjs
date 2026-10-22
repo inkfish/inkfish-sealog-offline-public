@@ -248,3 +248,101 @@ test('sync finds the exact client UUID through fulltext without reposting an exi
     await context.close();
   }
 });
+
+const UNSAFE_ID = 'x"><img src=x onerror="window.__xss=1">';
+
+test('Load Sealog Events keys an event with an unsafe client UUID by its server id', async ({ browser }) => {
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  await page.addInitScript(() => {
+    localStorage.setItem('username', 'tester');
+    localStorage.setItem('jwt', 'test-jwt');
+  });
+  await page.route('**/api/v1/**', async (route) => {
+    const url = new URL(route.request().url());
+    let body = [];
+    if (url.pathname.endsWith('/cruises')) {
+      body = [{ id: 'cruise-current', start_ts: '2026-09-08T00:00:00.000Z', stop_ts: null }];
+    } else if (url.pathname.endsWith('/events')) {
+      body = [{
+        id: 'abc123',
+        ts: '2026-09-08T12:00:00.000Z',
+        event_value: 'NOTE',
+        event_author: 'tester',
+        cruise_id: 'cruise-current',
+        event_free_text: 'Imported note',
+        event_options: [{ event_option_name: 'client_uuid', event_option_value: UNSAFE_ID }]
+      }];
+    }
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) });
+  });
+  const loadServerEvents = async (expectedMessage) => {
+    await page.locator('#menuBtn').click();
+    await page.getByRole('button', { name: 'Load Sealog Events', exact: true }).click();
+    await expect(page.locator('#confirmModal')).toContainText(expectedMessage);
+    await page.locator('#confirmModalConfirm').click();
+    await page.locator('#authCloseBtn').click();
+  };
+  try {
+    await page.goto(baseURL);
+    await page.locator('button.filter-chip[data-filter="all"]').click();
+    await loadServerEvents('Imported 1 server event.');
+    const card = page.locator('#list .event-card');
+    await expect(card).toHaveCount(1);
+    await expect(card).toHaveAttribute('data-id', 'server-abc123');
+    await expect(page.locator('#list img')).toHaveCount(0);
+    const stored = await page.evaluate(async () => {
+      const { getAll } = await import(new URL('/src/db/indexed-db.js', location.href).href);
+      return getAll('events');
+    });
+    expect(stored).toHaveLength(1);
+    expect(stored[0]).toMatchObject({ localId: 'server-abc123', client_uuid: 'server-abc123', serverId: 'abc123' });
+    // Loading again matches the stored event by server id instead of adding a copy.
+    await loadServerEvents('No new server events for this cruise.');
+    await expect(card).toHaveCount(1);
+    expect(await page.evaluate(() => window.__xss)).toBeUndefined();
+  } finally {
+    await context.close();
+  }
+});
+
+test('the event list renders a stored unsafe local id as inert text it can still act on', async ({ browser }) => {
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  await page.addInitScript(() => {
+    localStorage.setItem('username', 'tester');
+    localStorage.setItem('jwt', 'test-jwt');
+  });
+  await page.route('**/api/v1/**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+  try {
+    await page.goto(baseURL);
+    await page.evaluate(async (localId) => {
+      const { put } = await import(new URL('/src/db/indexed-db.js', location.href).href);
+      await put('events', {
+        localId,
+        client_uuid: localId,
+        type: 'NOTE',
+        eventTimestampUTC: '2026-09-08T12:00:00.000Z',
+        syncState: 'verify-failed',
+        notes: 'Stored by an older version',
+        option_values: [],
+        payload: {},
+        revisions: []
+      });
+    }, UNSAFE_ID);
+    await page.reload();
+    await page.locator('button.filter-chip[data-filter="all"]').click();
+    const card = page.locator('#list .event-card');
+    await expect(card).toHaveCount(1);
+    await expect(page.locator('#list img')).toHaveCount(0);
+    for (const selector of ['', ' .event-summary', ' .edit-event', ' .delete-event', ' .force-repost']) {
+      expect(await page.locator(`#list .event-card${selector}`).evaluate((el) => el.dataset.id)).toBe(UNSAFE_ID);
+    }
+    await card.locator('.event-summary').click();
+    await card.locator('.edit-event').click();
+    await expect(page.locator('#eventEditor')).toBeVisible();
+    expect(await page.evaluate(() => window.__xss)).toBeUndefined();
+  } finally {
+    await context.close();
+  }
+});

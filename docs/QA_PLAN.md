@@ -2,7 +2,7 @@
 
 Mark each scenario ✔ pass / ✖ fail / △ blocked. Capture screenshots of status messages or modals for the test log.
 
-Record the app and worker versions (both `v1.2.0.9` for this release), browser/OS, deployment URL, and whether the browser tab or installed app is under test. Cover at least one iPhone and one Android. Use a disposable test profile for first-run/reset scenarios; do not clear production site data or uninstall an app holding unsynced events.
+Record the app and worker versions (both `v1.2.0.10` for this release), browser/OS, deployment URL, and whether the browser tab or installed app is under test. Cover at least one iPhone and one Android. Use a disposable test profile for first-run/reset scenarios; do not clear production site data or uninstall an app holding unsynced events.
 
 Use a staging Sealog server and test account for captures, edits, clears, and forced responses. For each failure, record the scenario number, UTC time, exact message, and affected `localId`/`serverId` from the CSV when available. Do not attach credentials or session tokens. Compare server results using the same account and cruise as the test.
 
@@ -12,7 +12,7 @@ Run installation/offline loading, capture/sync, export, and settings checks on b
 
 | # | Scenario | Device | Steps | Expected | Status |
 |---|---|---|---|---|---|
-| 1 | First-run install | iPhone Safari | In a fresh test profile, browse to the trusted HTTPS vessel app URL → Add to Home Screen → launch it and wait for worker control → disable network and reopen | Both version labels show v1.2.0.9 and the installed vessel app reopens offline. Settings prompts sign-in; closing Settings allows manual capture while signed out. The deployment chooser is not the installed page. | ☐ |
+| 1 | First-run install | iPhone Safari | In a fresh test profile, browse to the trusted HTTPS vessel app URL → Add to Home Screen → launch it and wait for worker control → disable network and reopen | Both version labels show v1.2.0.10 and the installed vessel app reopens offline. Settings prompts sign-in; closing Settings allows manual capture while signed out. The deployment chooser is not the installed page. | ☐ |
 | 2 | First-run install | Android Chrome | In a fresh test profile, open the trusted HTTPS vessel app URL → install through the browser menu or offered prompt → launch, complete loading, disable network and reopen | Same offline behavior as 1. Check the browser tab and installed app separately; do not assume storage is shared between launch modes. | ☐ |
 | 3 | Theme picker - manual | iPhone | Settings → Theme → tap Light / Honey / Ocean | Each preset applies and persists after reload. Crossfade is used only when supported and reduced motion is not requested. | ☐ |
 | 4 | Theme picker - system follow | iPhone | With no saved preset in the test profile, toggle iOS Light/Dark while the app is open; then choose Honey and toggle the OS appearance again | Without a saved choice, app follows Light → Light, Dark → Ocean. After a manual choice it stays Honey. No crossfade on initial boot. There is no separate accent picker. | ☐ |
@@ -29,6 +29,8 @@ Run installation/offline loading, capture/sync, export, and settings checks on b
 | 40 | Invalid or stale GPS | iPhone | With the override enabled, try recording a missing fix, invalid coordinates, unknown accuracy, and a cached fix older than five minutes | Every case is rejected for capture, empty GPS fields on edit, and automatic ASNAP; the override relaxes only the 50 m accuracy limit. Use browser GPS simulation where needed. | ☐ |
 | 41 | Operations without new device GPS | iPhone | With no usable fix and the override off, capture Freeform Note, edit an event while retaining saved GPS, and sync an event using server backfill | Notes-only capture and the edit succeed without new device GPS. Server backfill follows its own availability rules and is unaffected by the override. | ☐ |
 | 42 | GPS tile and backfill display | iPhone | With backfill off, obtain a fresh fix between 30 m and 50 m accuracy → check the GPS tile → enable backfill; repeat with a location permission or sensor error | Above 30 m the normal tile says "GPS fix low accuracy" while the fix remains within the logging limit. Backfill replaces ordinary GPS tile text with its backfill status; sensor errors still remain visible. | ☐ |
+| 43 | GPS log | iPhone | Obtain a fix, capture with a GPS template, deny or lose GPS and capture again, reload, open GPS → Copy log | The GPS log lists each request newest first in UTC with its trigger, accuracy, fix age or clock gap, and result, including the error. Entries survive reload, contain no coordinates, and Copy log copies the same lines under a version header. | ☐ |
+| 44 | Phone clock behind GPS | iPhone | Outdoors, turn off Set Automatically, set the clock a minute or two behind, enable Airplane Mode, then capture with a GPS template and run ASNAP | Capture and ASNAP log normally. The GPS log shows `fix time … ahead of phone clock`. Restore Set Automatically afterwards and delete the test events. | ☐ |
 
 ## Auto-fill rules
 
@@ -76,11 +78,11 @@ Run installation/offline loading, capture/sync, export, and settings checks on b
 
 | # | Scenario | Device | Steps | Expected | Status |
 |---|---|---|---|---|---|
-| 24 | Update modal | iPhone | In disposable staging only, serve a controlled worker/app fixture with a different reported version → trigger an update check | After installation, the centered modal offers Reload now. Accepting reloads the page; app and worker labels agree on the staged fixture. Existing events/settings remain, and a subsequent offline reopen succeeds. The delivered release remains v1.2.0.9. | ☐ |
+| 24 | Update modal | iPhone | In disposable staging only, serve a controlled worker/app fixture with a different reported version → trigger an update check | After installation, the centered modal offers Reload now. Accepting reloads the page; app and worker labels agree on the staged fixture. Existing events/settings remain, and a subsequent offline reopen succeeds. The delivered release remains v1.2.0.10. | ☐ |
 | 25 | Update modal - "Not now" | iPhone | Update modal appears → tap Not now | Modal dismisses and the same reported version is suppressed for this page session. A different reported version can prompt again. | ☐ |
 | 26 | SW update trigger - visibility | iPhone | Serve the staging update fixture from 24 → background the app → return | Foregrounding triggers an update check, subject to the 10-second check throttle. After installation, the different version is offered; no fixed download time is guaranteed. | ☐ |
 | 27 | SW update trigger - reconnect | iPhone | Serve the staging update fixture from 24 → restore network connectivity | Reconnection triggers a check while online. After installation, the different version is offered. | ☐ |
-| 37 | Same-version replacement | Staging browser | Replace served files with a controlled test fixture that still reports v1.2.0.9 → reconnect and reload using [Manual Update](MANUAL_UPDATE.md) | Do not require a new-version prompt. Verify served file contents and the fixture's actual behavior; matching app/sw labels alone cannot identify which same-version snapshot loaded. Preserve the queue and test offline reopening. | ☐ |
+| 37 | Same-version replacement | Staging browser | Replace served files with a controlled test fixture that still reports v1.2.0.10 → reconnect and reload using [Manual Update](MANUAL_UPDATE.md) | Do not require a new-version prompt. Verify served file contents and the fixture's actual behavior; matching app/sw labels alone cannot identify which same-version snapshot loaded. Preserve the queue and test offline reopening. | ☐ |
 
 ## Misc
 
@@ -95,6 +97,6 @@ Run installation/offline loading, capture/sync, export, and settings checks on b
 - Scenario 10 needs sign-in and device GPS. Scenario 11 needs server-side vehicle and vessel telemetry bracketing the event timestamp.
 - For scenarios 30-33, exercise both cached/server templates and fallbacks. Preserve any saved edit-only or partial configuration when server templates refresh or return under a different ID with the same event value.
 - Scenarios 16, 19, and 34-37 need controlled server/browser fixtures; use the E2E examples in [Testing](TESTING.md) as a starting point. Do not force failures on a live operational server.
-- Scenarios 24-27 use distinct reported versions only in disposable staging fixtures. Scenario 37 covers replacement while retaining v1.2.0.9. Periodic checks run every five minutes; configured vessel paths are required for worker registration.
+- Scenarios 24-27 use distinct reported versions only in disposable staging fixtures. Scenario 37 covers replacement while retaining v1.2.0.10. Periodic checks run every five minutes; configured vessel paths are required for worker registration.
 - Scenarios 6, 8, 9, and 42 cover the tile-as-button + diagnostic modal pattern. Scenarios 39–41 cover override persistence, invalid/stale fixes, and operations that do not record new device GPS. Use controlled browser GPS fixtures when physical conditions cannot be reproduced; repeat ordinary capture/edit checks offline and while signed out, and sign in for automatic ASNAP.
 - Attach expected-versus-observed results for blocked/failed checks. A fixture limitation, unavailable physical GPS condition, or inaccessible server should be marked blocked with its reason, not passed.

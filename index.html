@@ -575,6 +575,31 @@ SOFTWARE.
     .gps-status .warn { color: var(--warn); }
     .gps-status .alert { color: var(--alert); }
 
+    /* GPS log — scrolls inside the GPS dialog. */
+    .gps-log-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .gps-log-list {
+      margin: 0;
+      padding: 9px 12px;
+      list-style: none;
+      max-height: 40vh;
+      overflow-y: auto;
+      overflow-wrap: anywhere;
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      font-size: 11px;
+      line-height: 1.5;
+      color: var(--ink-2);
+      background: var(--surface-2);
+      border: 1px solid var(--line);
+      border-radius: 5px;
+    }
+    /* Indent wrapped lines so each entry starts visibly at the margin. */
+    .gps-log-list li { padding-left: 2ch; text-indent: -2ch; }
+
     /* Diagnostic modal body — GPS + ASNAP modals.
        Outer .modal-body provides 14px/18px padding; inner sections strip their
        own padding so they don't double-up. */
@@ -1407,6 +1432,16 @@ SOFTWARE.
             <p id="gpsAllowPoorHelp" class="help">Applies to all device GPS logging: manual capture, GPS auto-fill, and ASNAP. When off, accuracy must be within 50m. A valid fix no older than 5 minutes with known accuracy is always required.</p>
             <p id="gpsLoggingPolicyWarning" class="help warn" role="status" hidden></p>
           </div>
+          <!-- Entries arrive every minute; keep them out of the dialog's live announcements. -->
+          <section class="settings-section" aria-live="off" aria-labelledby="gpsLogTitle">
+            <div class="gps-log-header">
+              <h3 id="gpsLogTitle" class="settings-h">GPS log</h3>
+              <button id="gpsLogCopyBtn" class="secondary small" type="button">Copy log</button>
+            </div>
+            <p class="help">Recent GPS activity on this device, newest first, in UTC. If GPS logging fails, screenshot or copy this log.</p>
+            <ol id="gpsLogList" class="gps-log-list"></ol>
+            <p id="gpsLogStatus" class="help muted" role="status"></p>
+          </section>
         </div>
       </div>
     </div>

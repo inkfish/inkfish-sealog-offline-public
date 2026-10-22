@@ -6,7 +6,7 @@ An iPhone-first web app for logging research-vessel events with UTC timestamps, 
 
 Open it on the ship network and add it to your Home Screen. Events remain on the device until you sync them; synced records stay available for offline review until you clear them through Settings. Templates with GPS auto-fill need a usable location fix when you log an event.
 
-**Current version:** `v1.2.0.9`
+**Current version:** `v1.2.0.10`
 
 [Quick Start](docs/QUICK_START.md) · [Installation](docs/INSTALLATION.md) · [Customization](docs/CUSTOMIZATION.md) · [Documentation](docs/README.md)
 
@@ -32,6 +32,7 @@ Screenshots use demonstration data.
 - **Use server templates.** Templates provide event types, required fields, and choices. Cached templates work offline; built-in CTD and note templates are available when no server templates are loaded.
 - **Auto-fill fields.** Use **Settings → Auto-fill rules → Manage rules…** to fill a field from the current time or GPS when logging or editing. New template configurations get **On log** defaults for recognized GPS field names, such as Latitude and Longitude. Saved choices, including **—** (no source) and edit-only rules, are preserved. **Save** applies changes immediately; edit rules fill only empty fields.
 - **Control GPS accuracy.** The GPS dialog's **Allow logging when GPS accuracy is poor** setting applies whenever device GPS is used for manual capture, GPS auto-fill, or ASNAP. Accuracy must be 50 metres or better unless the override is enabled, which displays a persistent warning. Missing or invalid fixes, unknown accuracy, and fixes older than five minutes are always rejected.
+- **Diagnose GPS problems.** The GPS dialog keeps a log of this device's recent GPS requests, newest first. Each entry shows what asked for the fix, its accuracy, its age or gap from the phone clock, and whether it could be used. **Copy log** copies it as text for IT support; it stores no coordinates.
 - **Review and edit.** Expand an event card to see its details. Edit ordinary events before or after syncing; synced edits are sent on the next sync. Automated ASNAP records are read-only on the device.
 - **Sync and import.** Sync runs automatically when possible, with retries for failed requests. **Sync queued events** starts a manual attempt; **Load Sealog Events** retrieves records from the active cruise.
 - **Record automated GPS snapshots.** Optional ASNAP logging captures positions at a chosen interval while signed in and applies the shared GPS accuracy policy. Keep the app open for reliable interval logging.

@@ -21,3 +21,14 @@ export function generateLocalId(now = Date.now()) {
   const randomPart = random.toString(36).slice(0, 8).padEnd(8, '0');
   return `${nowPart}${randomPart}`.slice(0, 16);
 }
+
+/**
+ * Check that a value can serve as a local event ID. Covers the base-36 IDs
+ * above, the UUIDs and `evt-` IDs of earlier versions, and `server-<id>` keys
+ * for imported events. Server data must pass this before it becomes a local ID.
+ * @param {*} value - Candidate ID.
+ * @returns {boolean} True for 1-64 ASCII letters, digits, hyphens, or underscores.
+ */
+export function isSafeLocalId(value) {
+  return typeof value === 'string' && /^[A-Za-z0-9_-]{1,64}$/.test(value);
+}
