@@ -147,6 +147,7 @@ The main Sync button also retries failed verification. Explicit re-post is a sep
 | `sealog.settings.accordion` | Open/closed state for Settings accordions |
 | `templateAutoFillRules` | Per-template auto-fill rules |
 | `asnapAllowPoorAccuracy` | Universal device GPS accuracy override, controlled from the GPS dialog; the existing key retains saved choices |
+| `gpsDiagnosticsLog` | Device GPS log shown in the GPS dialog: the newest 1,000 fix requests and errors, without coordinates |
 | `asnapEnabled`, `asnapShowInList` | ASNAP capture and display switches |
 | `asnapIntervalMs`, `asnapLastCaptureMs` | ASNAP scheduling state |
 | `asnapBackfillEnabled`, `asnapBackfillAllowlist` | Backfill switch and event/template allowlist |
@@ -167,6 +168,8 @@ The top of `app.js` caches frequently used elements in `dom`. Dynamic event card
 The GPS dialog's `gpsAllowPoorToggle` controls a shared policy for recording new device GPS: manual event capture, auto-fill into empty GPS fields on edit, and automatic ASNAP capture. The preference is independent of sign-in and network state. With the override disabled, accuracy must be 50 metres or better; enabling it relaxes only this accuracy limit. Missing fixes, invalid coordinates, unknown accuracy, and fixes older than five minutes remain invalid.
 
 An enabled override produces a persistent warning on the capture page and in the GPS dialog, including when the current fix is accurate. With the override off, a fix exceeding 50 metres produces guidance that recording new device GPS is blocked. The event editor shows the applicable warning when empty GPS auto-fill fields need a new fix. Notes-only captures and edits retaining saved GPS do not require a new fix, and server-derived ASNAP backfill coordinates are outside this device GPS policy.
+
+Every device fix and geolocation error is recorded in the GPS log with what requested it (warm-up, capture, edit, or ASNAP), its accuracy, and the policy result. Each entry keeps the device's raw fix time beside the phone-clock time it arrived, so clock skew stays visible even though the measurement time used for logging is capped at arrival. Field reports of GPS failures rarely include details, so the dialog lists the log newest first and copies it as text.
 
 ### Mobile Interaction & Viewport Tracking
 
@@ -281,7 +284,7 @@ Run these tools from a workstation checkout. They support certificate setup, app
 See [`TESTING.md`](./TESTING.md). Layered suite:
 
 - Unit, integration, and DOM tests run via Node test runner and Vitest + happy-dom.
-- Playwright E2E specs exercise appearance, worker/offline sync, landing navigation, real auto-fill capture/edit, and server import/deduplication.
+- Playwright E2E specs exercise appearance, worker/offline sync, landing navigation, real auto-fill capture/edit, the device GPS policy and log, and server import/deduplication.
 
 ---
 

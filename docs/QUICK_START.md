@@ -48,7 +48,7 @@ The top of the app shows four status tiles. Read the message as well as its colo
 | **ASNAP** | Whether automated snapshots are on, off, or paused, and whether sign-in or a GPS fix is needed. |
 | **Queue** | How many stored events still need syncing, out of the total on the device. |
 
-Tap **GPS** for coordinates, accuracy, fix age, and the poor-accuracy setting. Tap **ASNAP** for automatic logging and backfill controls. The message below **Recent Events** reports sync results and errors.
+Tap **GPS** for coordinates, accuracy, fix age, the poor-accuracy setting, and the GPS log. Tap **ASNAP** for automatic logging and backfill controls. The message below **Recent Events** reports sync results and errors.
 
 ![GPS dialog showing coordinates, accuracy, fix age, and the enabled poor-accuracy warning](screenshots/04-gps-modal.png)
 
@@ -57,6 +57,8 @@ In **GPS**, **Allow logging when GPS accuracy is poor** controls every new devic
 With it off, recording a new device GPS fix requires accuracy of 50 metres or better. Turn it on to allow less accurate fixes; a warning stays visible on the capture page and in the GPS dialog while it is enabled. It never permits a missing fix, invalid coordinates, unknown accuracy, or a fix more than five minutes old.
 
 Notes-only capture and edits that retain saved GPS values do not need a new fix. This setting does not affect coordinates supplied by Sealog server backfill.
+
+If GPS logging fails, screenshot the **GPS log** at the bottom of the GPS dialog, or tap **Copy log**, and send it to IT. The log lists recent GPS requests on this device and contains no coordinates. [Troubleshooting](TROUBLESHOOTING.md) explains how to read it.
 
 ## 5. Capture an event
 

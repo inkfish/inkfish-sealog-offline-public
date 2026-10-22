@@ -59,6 +59,7 @@ The worker skips non-GET requests, cross-origin requests, and GET paths that nor
 | IndexedDB `meta` | Cruise context and template-sync metadata | Updated during use. Sign-out clears the saved cruise ID/start/stop context. |
 | `localStorage.jwt` | Bearer token | Explicit sign-out or the applicable unauthorized-response handler. |
 | `localStorage.username` / `userId` | Display identity and attribution | Explicit sign-out removes both; some unauthorized-response paths leave identity values. |
+| `localStorage.gpsDiagnosticsLog` | The newest 1,000 GPS requests: times, trigger, accuracy, errors, and results, without coordinates | Persists across sign-out and app updates; older entries drop off as new ones arrive. |
 | Other `localStorage` preferences | Theme, auto-fill rules, ASNAP settings, API overrides | Persist across sign-out and app updates. |
 | `localStorage.asnapBackfillDebugSnapshot` | Latest full backfill diagnostic snapshot, including sampled telemetry/context | Overwritten by later snapshots; sign-out does not remove it. |
 | Service-worker Cache Storage | Same-origin app/static responses handled by the worker | Activation removes older app caches. Reference Sealog API routes bypass this cache. Only a successful same-origin HTML response for an app entry path replaces the cached offline app page. |

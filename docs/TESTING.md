@@ -73,7 +73,7 @@ These integration tests compose exported helpers. They do not bootstrap `app.js`
 - `offline-sync.spec.mjs`: tests covering prefixed worker registration/control, cached offline reload, offline launch of every vessel path after non-app navigations, a worker-version update, and capture/queue/POST synchronization.
 - `landing.spec.mjs`: deployment links.
 - `auto-fill.spec.mjs`: actual offline capture, empty-only edit rules, and uploaded time/GPS option values.
-- `gps-logging-policy.spec.mjs`: universal GPS accuracy and freshness checks, override persistence, empty-only edit fills, and cancellation of pending GPS operations.
+- `gps-logging-policy.spec.mjs`: universal GPS accuracy and freshness checks, override persistence, empty-only edit fills, cancellation of pending GPS operations, fixes stamped ahead of the phone clock, and the GPS log.
 - `server-import.spec.mjs`: current server records, verbatim notes, refresh/persistence, retained backfill metadata, UUID deduplication using supported API queries, and inert handling of unsafe imported IDs.
 - `sync-verification.spec.mjs`: missing insert IDs, exact UUID confirmation, failed lookups, bounded retries, duplicate matches, auxiliary upload, and edits during recovery.
 

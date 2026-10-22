@@ -91,7 +91,17 @@ import {
   buildSwDisplayLabel,
   shouldWarnVersionMismatch
 } from './src/runtime/version-state.js';
-import { resolveGpsStatusDisplay, mapGeoError, evaluateGpsLoggingFix, fixFromPosition } from './src/runtime/gps-status.js';
+import {
+  resolveGpsStatusDisplay,
+  mapGeoError,
+  evaluateGpsLoggingFix,
+  fixFromPosition,
+  gpsLogFixEntry,
+  gpsLogErrorEntry,
+  appendGpsLogEntry,
+  parseGpsLog,
+  formatGpsLogEntry
+} from './src/runtime/gps-status.js';
 import {
   resolveApiRoot as resolveApiRootUtil,
   buildAsnapVesselApiRootCandidates as buildAsnapVesselApiRootCandidatesUtil
@@ -211,6 +221,10 @@ const dom = {
   fixAge: document.getElementById('fixAge'),
   fixWarning: document.getElementById('fixWarning'),
   fixWarningAnnounce: document.getElementById('fixWarningAnnounce'),
+  gpsModal: document.getElementById('gpsModal'),
+  gpsLogList: document.getElementById('gpsLogList'),
+  gpsLogCopyBtn: document.getElementById('gpsLogCopyBtn'),
+  gpsLogStatus: document.getElementById('gpsLogStatus'),
   gpsLoggingWarning: document.getElementById('gpsLoggingWarning'),
   gpsLoggingPolicyWarning: document.getElementById('gpsLoggingPolicyWarning'),
   eventEditorGpsWarning: document.getElementById('eventEditorGpsWarning'),
@@ -332,6 +346,9 @@ const ASNAP_BACKFILL_INITIAL_ALLOWLIST = [
 let asnapEnabled = localStorage.getItem(ASNAP_STORAGE_KEYS.enabled) === '1';
 let asnapShowInList = localStorage.getItem(ASNAP_STORAGE_KEYS.showInList) !== '0';
 let allowPoorGpsAccuracy = localStorage.getItem(GPS_ALLOW_POOR_ACCURACY_STORAGE_KEY) === '1';
+// Field reports of GPS failures rarely include details, so the device keeps its own record.
+const GPS_LOG_STORAGE_KEY = 'gpsDiagnosticsLog';
+let gpsLog = parseGpsLog(localStorage.getItem(GPS_LOG_STORAGE_KEY));
 let asnapIntervalMs = parseInt(localStorage.getItem(ASNAP_STORAGE_KEYS.intervalMs), 10);
 if (!Number.isFinite(asnapIntervalMs) || asnapIntervalMs < ASNAP_MIN_INTERVAL_MS || asnapIntervalMs > ASNAP_MAX_INTERVAL_MS) {
   asnapIntervalMs = ASNAP_DEFAULT_INTERVAL_MS;
@@ -1172,8 +1189,8 @@ function updateGpsLoggingWarning() {
   });
 }
 
-async function getLoggingFix() {
-  const fix = await getFix();
+async function getLoggingFix(trigger) {
+  const fix = await getFix(trigger);
   const policy = gpsLoggingPolicy(fix);
   if (!policy.allowed) throw new Error(gpsLoggingBlockedMessage(policy, fix));
   if (policy.warning) setFixMessage(policy.warning);
@@ -1321,7 +1338,7 @@ async function runAsnapCapture() {
 
     let fix = null;
     try {
-      fix = await getFix();
+      fix = await getFix('ASNAP');
     } catch {
       // Report acquisition failure after checking whether logging is still enabled.
     }
@@ -1891,7 +1908,7 @@ async function handleEventEditorSubmit(ev) {
     if (!skipAccInput && accRaw && Number.isNaN(accNumberRaw)) {
       throw new Error('Accuracy must be a number');
     }
-    const fix = editorNeedsGpsFix() ? await getLoggingFix() : null;
+    const fix = editorNeedsGpsFix() ? await getLoggingFix('edit') : null;
     // The user can close this editor and open another while GPS is pending.
     if (editingEvent !== original) return;
     const { optionValues, optionMap } = collectEditorOptionValues({ timestampIso, fix });
@@ -2835,6 +2852,28 @@ function updateFixUI() {
   }
 }
 
+function recordGpsLog(entry) {
+  gpsLog = appendGpsLogEntry(gpsLog, entry);
+  persistSetting(GPS_LOG_STORAGE_KEY, JSON.stringify(gpsLog));
+  if (dom.gpsModal && !dom.gpsModal.hidden) renderGpsLog();
+}
+
+function gpsLogLinesNewestFirst() {
+  return gpsLog.map(formatGpsLogEntry).reverse();
+}
+
+function renderGpsLog() {
+  if (!dom.gpsLogList) return;
+  const lines = gpsLogLinesNewestFirst();
+  const items = (lines.length ? lines : ['No GPS activity recorded yet.']).map((line) => {
+    const item = document.createElement('li');
+    item.textContent = line;
+    return item;
+  });
+  dom.gpsLogList.replaceChildren(...items);
+  if (dom.gpsLogCopyBtn) dom.gpsLogCopyBtn.disabled = !lines.length;
+}
+
 function setFixMessage(message, level = 'warn') {
   lastFixMessage = message;
   if (message) {
@@ -2871,7 +2910,9 @@ function requestPassiveFix({ force = false } = {}) {
   navigator.geolocation.getCurrentPosition(
     (pos) => {
       gpsWarmupInFlight = false;
-      lastFix = fixFromPosition(pos);
+      const receivedAtMs = Date.now();
+      lastFix = fixFromPosition(pos, receivedAtMs);
+      recordGpsLog(gpsLogFixEntry({ position: pos, receivedAtMs, trigger: 'warm-up', decision: gpsLoggingPolicy() }));
       lastFixMessage = '';
       updateFixUI();
       if (asnapEnabled) {
@@ -2880,6 +2921,7 @@ function requestPassiveFix({ force = false } = {}) {
     },
     (err) => {
       gpsWarmupInFlight = false;
+      recordGpsLog(gpsLogErrorEntry({ error: err, receivedAtMs: Date.now(), trigger: 'warm-up' }));
       if (err?.code === err?.PERMISSION_DENIED) {
         gpsWarmupPermissionDenied = true;
         stopGpsWarmup();
@@ -2926,7 +2968,12 @@ function handleVisibilityChange() {
   updateAsnapStatus();
 }
 
-async function getFix() {
+/**
+ * Request a current device fix, falling back to a recent saved fix on error.
+ * @param {string} [trigger] - What needs the fix, recorded in the GPS log.
+ * @returns {Promise<object>} The fix.
+ */
+async function getFix(trigger = 'capture') {
   setGpsStatus('warn', 'Requesting GPS fix…');
   setFixMessage('');
   return new Promise((resolve, reject) => {
@@ -2945,7 +2992,9 @@ async function getFix() {
 
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        lastFix = fixFromPosition(pos);
+        const receivedAtMs = Date.now();
+        lastFix = fixFromPosition(pos, receivedAtMs);
+        recordGpsLog(gpsLogFixEntry({ position: pos, receivedAtMs, trigger, decision: gpsLoggingPolicy() }));
         lastFixMessage = '';
         updateFixUI();
         resolve(lastFix);
@@ -2955,12 +3004,16 @@ async function getFix() {
         if (lastFix) {
           const ageMs = Date.now() - lastFix.timestampMs;
           if (ageMs < STALE_FIX_MAX_MS * 6) {
+            recordGpsLog(gpsLogErrorEntry({
+              error: err, receivedAtMs: Date.now(), trigger, savedFixAgeMs: ageMs, decision: gpsLoggingPolicy()
+            }));
             setFixMessage(`${friendly}. Using cached fix from ${formatDuration(ageMs)} ago.`, 'warn');
             updateFixUI();
             resolve(lastFix);
             return;
           }
         }
+        recordGpsLog(gpsLogErrorEntry({ error: err, receivedAtMs: Date.now(), trigger }));
         setFixMessage(`${friendly}.`, 'alert');
         setGpsStatus('alert', 'GPS error');
         reject(new Error(friendly));
@@ -3272,6 +3325,17 @@ dom.asnapShowToggle?.addEventListener('change', () => {
   persistBoolSetting(ASNAP_STORAGE_KEYS.showInList, asnapShowInList);
   updateFilterChips();
   render();
+});
+
+dom.gpsLogCopyBtn?.addEventListener('click', async () => {
+  const lines = gpsLogLinesNewestFirst();
+  const text = [`Sealog Offline ${CACHE_VERSION} GPS log, copied ${new Date().toISOString()}`, ...lines].join('\n');
+  try {
+    await navigator.clipboard.writeText(text);
+    status(dom.gpsLogStatus, null, `Copied ${lines.length} entries.`);
+  } catch {
+    status(dom.gpsLogStatus, null, 'Copy failed. Take a screenshot of the log instead.');
+  }
 });
 
 dom.gpsAllowPoorToggle?.addEventListener('change', () => {
@@ -3695,7 +3759,7 @@ async function captureEvent() {
     const hasAutoLongitude = currentOptionDefinitions.some((opt) => opt._auto === 'longitude' || opt._auto === 'rule:lon');
     const hasAutoAccuracy = currentOptionDefinitions.some((opt) => opt._auto === 'accuracy' || opt._auto === 'rule:acc');
     const captureNeedsGps = hasAutoLatitude || hasAutoLongitude || hasAutoAccuracy;
-    const fix = captureNeedsGps ? await getLoggingFix() : null;
+    const fix = captureNeedsGps ? await getLoggingFix('capture') : null;
     const selectedOption = dom.type.options[dom.type.selectedIndex];
     if (!selectedOption || selectedOption.disabled) {
       throw new Error('Select an event type before capturing.');
@@ -6116,6 +6180,7 @@ bootstrap().catch((err) => {
 // Diagnostic panels share the application's scroll-lock state.
 function setDiagnosticPanelOpen(panel, open) {
   if (panel.hidden === !open) return;
+  if (open && panel === dom.gpsModal) renderGpsLog();
   panel.hidden = !open;
   if (open) lockBodyScroll();
   else unlockBodyScroll();

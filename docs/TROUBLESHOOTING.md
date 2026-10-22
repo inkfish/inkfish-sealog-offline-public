@@ -26,6 +26,16 @@ For an iPhone or iPad using the deployment's private CA, follow [certificate ins
 
 Bring the app to the foreground while you have a clear view of the sky. Check whether the fix age updates. A capture with GPS auto-fill requests a location fix, but the app can use a cached fix if the new request fails. The cached fix must still meet the GPS policy: a fix more than five minutes old is rejected even with the poor-accuracy override enabled.
 
+**GPS logging failed and nobody knows why**
+
+Tap the GPS tile and screenshot the **GPS log**, or tap **Copy log** and send the text. The log keeps this device's last 1,000 GPS requests, newest first, in UTC. It survives reloads and records no coordinates. Each line shows what asked for the fix (warm-up, capture, edit, or ASNAP), the accuracy, and whether the fix could be used for logging:
+
+- `fix time … ahead of phone clock`: the phone's clock is behind GPS time, which is common off the ship network. Logging still works, but report it.
+- `fix … old` in minutes with `rejected: stale fix`: the device returned an old position.
+- `error: Timed out waiting for GPS` or `Unable to determine location`: no fix arrived within 10 seconds. A saved fix is used only if it is under five minutes old.
+- `rejected: accuracy over limit`: see the accuracy setting above.
+- A gap of more than a couple of minutes: the app was closed or in the background.
+
 **Capture fails because GPS or a required value is missing**
 
 Read the failure message and check the selected template. A field configured for GPS auto-fill needs a usable fix, even if the template does not otherwise mark that field as required. Fields without auto-fill may need manual entry. Notes-only capture and edits that retain saved GPS values do not need a new fix. Sealog server backfill uses server coordinates and is unaffected by the device GPS setting.
