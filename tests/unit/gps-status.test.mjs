@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { evaluateGpsLoggingFix, resolveGpsStatusDisplay, mapGeoError } from '../../src/runtime/gps-status.js';
+import { evaluateGpsLoggingFix, fixFromPosition, resolveGpsStatusDisplay, mapGeoError } from '../../src/runtime/gps-status.js';
 import { STALE_FIX_MAX_MS } from '../../src/config/constants.js';
 
 const GEO_ERR = { PERMISSION_DENIED: 1, POSITION_UNAVAILABLE: 2, TIMEOUT: 3 };
@@ -87,6 +87,20 @@ test('GPS logging uses the current time when no explicit clock is supplied', (t)
   assert.deepEqual(evaluateGpsLoggingFix({ fix: GPS_FIX, timestampMs: NOW }), {
     allowed: true, reason: null, warning: null
   });
+});
+
+test('a device fix keeps its measurement time but is never measured after it arrived', (t) => {
+  const position = (timestamp) => ({ coords: { latitude: 12.1, longitude: -68.9, accuracy: 8 }, timestamp });
+  assert.deepEqual(fixFromPosition(position(NOW - 1_000), NOW), { ...GPS_FIX, timestampMs: NOW - 1_000 });
+  assert.deepEqual(fixFromPosition(position(NOW + 30_000), NOW), { ...GPS_FIX, timestampMs: NOW });
+  assert.deepEqual(gpsDecision({ timestampMs: fixFromPosition(position(NOW + 30_000), NOW).timestampMs }), {
+    allowed: true, reason: null, warning: null
+  });
+  for (const timestamp of [undefined, null, NaN]) {
+    assert.equal(gpsDecision({ timestampMs: fixFromPosition(position(timestamp), NOW).timestampMs }).reason, 'stale');
+  }
+  t.mock.method(Date, 'now', () => NOW);
+  assert.equal(fixFromPosition(position(NOW + 30_000)).timestampMs, NOW);
 });
 
 test('resolveGpsStatusDisplay overlays GPS tile when ASNAP backfill is enabled', () => {

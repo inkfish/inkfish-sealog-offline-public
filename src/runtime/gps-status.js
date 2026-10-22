@@ -38,6 +38,19 @@ export function evaluateGpsLoggingFix({
 }
 
 /**
+ * Convert a Geolocation API position into a device GPS fix.
+ * @param {object} position - A GeolocationPosition with `coords` and `timestamp`.
+ * @param {number} [receivedAtMs] - Time the page received the position, in milliseconds since the epoch.
+ * @returns {{lat: number, lon: number, acc_m: number, timestampMs: number}} The fix and its measurement time.
+ */
+export function fixFromPosition(position, receivedAtMs = Date.now()) {
+  const { latitude, longitude, accuracy } = position.coords;
+  // Location services can stamp fixes from GPS time, which may run ahead of an
+  // unsynced device clock; a fix cannot have been measured after it arrived.
+  return { lat: latitude, lon: longitude, acc_m: accuracy, timestampMs: Math.min(position.timestamp, receivedAtMs) };
+}
+
+/**
  * Compute GPS tile display state/message with optional ASNAP backfill overlay.
  * @param {object} options - Inputs for the GPS status tile.
  * @param {'ok'|'warn'|'alert'|null} options.state - Base GPS status state.

@@ -91,7 +91,7 @@ import {
   buildSwDisplayLabel,
   shouldWarnVersionMismatch
 } from './src/runtime/version-state.js';
-import { resolveGpsStatusDisplay, mapGeoError, evaluateGpsLoggingFix } from './src/runtime/gps-status.js';
+import { resolveGpsStatusDisplay, mapGeoError, evaluateGpsLoggingFix, fixFromPosition } from './src/runtime/gps-status.js';
 import {
   resolveApiRoot as resolveApiRootUtil,
   buildAsnapVesselApiRootCandidates as buildAsnapVesselApiRootCandidatesUtil
@@ -2869,8 +2869,7 @@ function requestPassiveFix({ force = false } = {}) {
   navigator.geolocation.getCurrentPosition(
     (pos) => {
       gpsWarmupInFlight = false;
-      const { latitude, longitude, accuracy } = pos.coords;
-      lastFix = { lat: latitude, lon: longitude, acc_m: accuracy, timestampMs: pos.timestamp };
+      lastFix = fixFromPosition(pos);
       lastFixMessage = '';
       updateFixUI();
       if (asnapEnabled) {
@@ -2944,8 +2943,7 @@ async function getFix() {
 
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        const { latitude, longitude, accuracy } = pos.coords;
-        lastFix = { lat: latitude, lon: longitude, acc_m: accuracy, timestampMs: pos.timestamp };
+        lastFix = fixFromPosition(pos);
         lastFixMessage = '';
         updateFixUI();
         resolve(lastFix);

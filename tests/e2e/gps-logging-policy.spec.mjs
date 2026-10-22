@@ -435,3 +435,24 @@ for (const [description, gps] of [
     }
   });
 }
+
+test('a fix stamped ahead of the device clock is current for capture and ASNAP', async ({ browser }) => {
+  // Off the ship network, location services can stamp fixes from GPS time ahead of the unsynced device clock.
+  const { page, context, dialogs } = await openApp(browser, { gps: { accuracy: 5, ageMs: -30000 }, frozen: true });
+  try {
+    await page.locator('#type').selectOption({ label: 'GPS Capture' });
+    await page.locator('#captureBtn').click();
+    await expect.poll(async () => (await readEvents(page)).length).toBe(1);
+    expect(optionsOf((await readEvents(page))[0])).toMatchObject({ Latitude: '12.123456', Longitude: '-68.654321', Accuracy: '5' });
+
+    await page.locator('#asnapStatusTile').click();
+    await page.locator('#asnapIntervalSelect').selectOption('60000');
+    await page.locator('#asnapEnableToggle').check();
+    await page.locator('#asnapModalCloseBtn').click();
+    await page.clock.runFor(10000);
+    await expect.poll(async () => (await readEvents(page)).filter((event) => event.isAsnap).length).toBe(1);
+    expect(dialogs).toEqual([]);
+  } finally {
+    await context.close();
+  }
+});
