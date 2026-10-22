@@ -2,7 +2,7 @@
 
 How the Sealog Offline Logger is structured, what each module does, and how data flows through it.
 
-Intended for contributors maintaining the application. This guide describes the v1.2.0.9 client; deployment-specific server permissions and schemas are covered by the server's API documentation.
+Intended for contributors maintaining the application. This guide describes the v1.2.0.10 client; deployment-specific server permissions and schemas are covered by the server's API documentation.
 
 For a working deployment, start with [Installation](INSTALLATION.md). For changing routes, backend addresses, templates, appearance, or icons, use [Customization](CUSTOMIZATION.md). This guide explains the implementation behind those instructions.
 

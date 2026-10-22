@@ -6,7 +6,7 @@ An iPhone-first web app for logging research-vessel events with UTC timestamps, 
 
 Open it on the ship network and add it to your Home Screen. Events remain on the device until you sync them; synced records stay available for offline review until you clear them through Settings. Templates with GPS auto-fill need a usable location fix when you log an event.
 
-**Current version:** `v1.2.0.9`
+**Current version:** `v1.2.0.10`
 
 [Quick Start](docs/QUICK_START.md) · [Installation](docs/INSTALLATION.md) · [Customization](docs/CUSTOMIZATION.md) · [Documentation](docs/README.md)
 

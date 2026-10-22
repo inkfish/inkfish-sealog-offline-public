@@ -1,6 +1,6 @@
 # Troubleshooting
 
-This guide covers **v1.2.0.9**. Read the status tiles and the message below **Recent Events** first. Open **Settings** to check the signed-in account and the **app** and **sw** version labels.
+This guide covers **v1.2.0.10**. Read the status tiles and the message below **Recent Events** first. Open **Settings** to check the signed-in account and the **app** and **sw** version labels.
 
 **Keep device data intact while troubleshooting.** Unsynced events exist in the browser/profile that captured them. Do not clear browser site data, delete its database, or uninstall the app to fix a display or update problem. The **Export CSV** button beside Recent Events can save a copy of those stored records. The app does not provide CSV import or restore, so an export is not a reason to delete the original queue.
 
@@ -156,7 +156,7 @@ IT can check the required server responses in the [API specification](SPECIFICAT
 
 **The app will not open offline**
 
-Reconnect to the ship network and open the same vessel address used previously. Let the app finish loading, accept any update prompt, and check that the Settings **app** and **sw** versions both show **v1.2.0.9** for this release. Then test an offline reopen. Use the vessel app page, not the deployment chooser. If it still fails, give IT both version labels and the address; preserve site data.
+Reconnect to the ship network and open the same vessel address used previously. Let the app finish loading, accept any update prompt, and check that the Settings **app** and **sw** versions both show **v1.2.0.10** for this release. Then test an offline reopen. Use the vessel app page, not the deployment chooser. If it still fails, give IT both version labels and the address; preserve site data.
 
 If **sw** says **inactive**, the page may be outside a configured vessel path. If it says **registration failed** or **unsupported**, ask IT to check the browser, HTTPS trust, worker URL, and served files using [Installation](INSTALLATION.md). Opening an HTML file directly is not an offline installation.
 

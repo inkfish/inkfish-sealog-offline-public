@@ -1,6 +1,6 @@
 # Release checklist
 
-This checklist is for maintainers preparing a static-app release. The current version is v1.2.0.9. Use [Installation](INSTALLATION.md) for a new host, [Manual updates](MANUAL_UPDATE.md) for copying a release and rollback, and [Customization](CUSTOMIZATION.md) when preparing a deployment-specific variant.
+This checklist is for maintainers preparing a static-app release. The current version is v1.2.0.10. Use [Installation](INSTALLATION.md) for a new host, [Manual updates](MANUAL_UPDATE.md) for copying a release and rollback, and [Customization](CUSTOMIZATION.md) when preparing a deployment-specific variant.
 
 ## Prepare the source
 
@@ -60,7 +60,7 @@ The app-icon generator currently writes five PNGs: the 16/32-pixel favicons, 180
 After the validated commit has been tagged, run this from the repository root. Set `release_tag` to that tag; the example uses the current release. `git archive` reads the committed tag, so uncommitted changes are not included.
 
 ```bash
-release_tag=v1.2.0.9
+release_tag=v1.2.0.10
 release_dir=$(mktemp -d)
 git archive --format=tar --output="$release_dir/sealog-offline-${release_tag}.tar" \
   "$release_tag" \

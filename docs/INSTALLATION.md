@@ -1,6 +1,6 @@
 # Install the application
 
-This walkthrough takes a customized **v1.2.0.9** checkout to a working HTTPS
+This walkthrough takes a customized **v1.2.0.10** checkout to a working HTTPS
 installation. It uses a Linux nginx server and a separate administrator
 workstation. The app is served directly from its source files; **there is no
 application build command**. Node.js is only needed for development tools, tests,
@@ -47,7 +47,7 @@ cd sealog-offline
 
 Use an authenticated clone method if the repository is private. All subsequent
 workstation paths assume this repository root. Review the checkout's version;
-the current source is v1.2.0.9. A release tag or downloadable archive is only
+the current source is v1.2.0.10. A release tag or downloadable archive is only
 available after the repository maintainer publishes one.
 
 ## 2. Choose and customize the deployment
@@ -263,7 +263,7 @@ curl --cacert "$ca_file" -fsS "$origin/sealog-a/src/config/constants.js" | grep 
 Omit `--cacert "$ca_file"` if curl already trusts the issuer. Do not use `-k` to
 pass acceptance checks: it skips the trust and hostname verification needed by
 the devices. Expect 200 responses, JavaScript MIME types for both worker files,
-an image MIME type for the icon, and v1.2.0.9 in both constants. Prefixed app files
+an image MIME type for the icon, and v1.2.0.10 in both constants. Prefixed app files
 should carry `Cache-Control: no-cache`. Repeat for every configured app prefix
 and verify the root-level app assets too; the worker fetches all of them.
 
@@ -287,7 +287,7 @@ prove account permissions or writing events works; verify those in a test cruise
    the expected templates and cruise are available. Remove any development API
    override as described in [Customization](CUSTOMIZATION.md#override-the-event-api-only-when-needed).
 3. Grant location permission, then check GPS fix age and accuracy. Open Settings
-   and wait for both **app** and **sw** to show **v1.2.0.9**.
+   and wait for both **app** and **sw** to show **v1.2.0.10**.
 4. Add the **deployment page** to the Home Screen, not the landing hub. Reopen
    that installed app while connected and verify its account/settings there.
 5. In the test cruise, capture and sync a harmless event. Confirm the record on

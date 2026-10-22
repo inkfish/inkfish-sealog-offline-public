@@ -1,6 +1,6 @@
 # Sealog Server API - Offline Logger Integration
 
-The requests and response fields used by the v1.2.0.9 Offline Logger PWA. This is the client contract derived from [`app.js`](../app.js) and [`src/events/event-transform.js`](../src/events/event-transform.js), not a complete server API specification or a claim that every server release supports it. Verify the deployed server's schemas and permissions at its `/documentation` endpoint and exercise the [field QA checks](QA_PLAN.md).
+The requests and response fields used by the v1.2.0.10 Offline Logger PWA. This is the client contract derived from [`app.js`](../app.js) and [`src/events/event-transform.js`](../src/events/event-transform.js), not a complete server API specification or a claim that every server release supports it. Verify the deployed server's schemas and permissions at its `/documentation` endpoint and exercise the [field QA checks](QA_PLAN.md).
 
 Use [Installation](INSTALLATION.md) for hosting and [Customization](CUSTOMIZATION.md) for API-root and deployment-route changes.
 

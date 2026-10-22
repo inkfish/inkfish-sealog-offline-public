@@ -6,7 +6,7 @@
 
 import { normalizePath, buildCacheKeys, isNetworkFirstAssetPath, isAppShellResponse } from './src/sw/helpers.js';
 
-const CACHE_VERSION = 'v1.2.0.9';
+const CACHE_VERSION = 'v1.2.0.10';
 /** @type {string} Full cache key combining the prefix and version. */
 const CACHE_NAME = `sealog-offline-${CACHE_VERSION}`;
 /** Example deployment path prefixes for nginx routing. */

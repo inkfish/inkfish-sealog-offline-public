@@ -1,6 +1,6 @@
 # Manual updates and rollback
 
-This guide deploys **v1.2.0.9** from a workstation using rsync. Serving this static client does not require Git, Node.js, npm, or the test suite on the production host; Sealog Server has its own backend requirements. There is no application build step and no automated server installer in this repository.
+This guide deploys **v1.2.0.10** from a workstation using rsync. Serving this static client does not require Git, Node.js, npm, or the test suite on the production host; Sealog Server has its own backend requirements. There is no application build step and no automated server installer in this repository.
 
 For a new host, start with [Installation](INSTALLATION.md), which covers DNS,
 certificates, nginx, backends, and device trust. Return here when that guide asks
@@ -109,7 +109,7 @@ Requires the GitHub CLI and an available release in your source repository. Repl
 
 ```bash
 SOURCE_REPO='OWNER/REPOSITORY'
-release_tag=v1.2.0.9
+release_tag=v1.2.0.10
 download_dir=$(mktemp -d /tmp/sealog-download.XXXXXX)
 stage=$(mktemp -d /tmp/sealog-app.XXXXXX)
 
@@ -129,7 +129,7 @@ Stop if downloading, checksum verification, or extraction fails. On Linux, use `
 Run this from the repository root. It copies the files currently on disk, including local changes; use a verified release checkout for a reproducible deployment.
 
 ```bash
-release_tag=v1.2.0.9
+release_tag=v1.2.0.10
 stage=$(mktemp -d /tmp/sealog-app.XXXXXX)
 
 rsync -rp --chmod=D755,F644 \
@@ -159,7 +159,7 @@ Before either type of bundle is transferred, check the two runtime versions:
 grep 'CACHE_VERSION =' "$stage/sw.js" "$stage/src/config/constants.js"
 ```
 
-Both should say `v1.2.0.9`. If you changed artwork, make sure the staged icon bytes
+Both should say `v1.2.0.10`. If you changed artwork, make sure the staged icon bytes
 and URL revisions include those changes too. Keep the local staged directory
 until deployment verification succeeds.
 
@@ -192,7 +192,7 @@ The following command runs from the workstation. It creates a backup on an exist
 ```bash
 ssh -t "$prod" '
   set -eu
-  stage="$HOME/sealog-update-v1.2.0.9"
+  stage="$HOME/sealog-update-v1.2.0.10"
   web_root=/srv/sealog-offline
   backup="/srv/sealog-offline-backup-$(date -u +%Y%m%dT%H%M%SZ)"
 
@@ -224,7 +224,7 @@ For a directory dedicated entirely to this app, preview an exact mirror in a
 **server shell**, with `stage` and `web_root` set to the same paths used above:
 
 ```bash
-stage="$HOME/sealog-update-v1.2.0.9"
+stage="$HOME/sealog-update-v1.2.0.10"
 web_root=/srv/sealog-offline
 sudo rsync -rpn --delete --itemize-changes --exclude='/sw.js' \
   "$stage/" "$web_root/"
@@ -256,12 +256,12 @@ curl -fsS -H 'Cache-Control: no-cache' "$origin/sealog-a/src/config/constants.js
   | grep 'CACHE_VERSION ='
 ```
 
-Both must show **`v1.2.0.9`**. Check the other configured vessel routes too. App HTML, JavaScript, the manifest, and the worker should use `Cache-Control: no-cache`, as in the reference configuration. For curl with a private CA, install that CA or supply its certificate with `--cacert`.
+Both must show **`v1.2.0.10`**. Check the other configured vessel routes too. App HTML, JavaScript, the manifest, and the worker should use `Cache-Control: no-cache`, as in the reference configuration. For curl with a private CA, install that CA or supply its certificate with `--cacert`.
 
 On each installed device:
 
 1. Open or foreground the app while connected to the deployment network. It checks for updates on startup, foreground/reconnect, and periodically while online.
-2. Tap **Reload now** when prompted. Confirm the app and worker versions in Settings both show **v1.2.0.9**. A same-version deployment can update files without a new-version prompt; foreground and reload the connected app, then verify the actual changed behavior/assets as well as the version labels.
+2. Tap **Reload now** when prompted. Confirm the app and worker versions in Settings both show **v1.2.0.10**. A same-version deployment can update files without a new-version prompt; foreground and reload the connected app, then verify the actual changed behavior/assets as well as the version labels.
 3. Confirm existing events and settings remain present. A template with no saved rules should receive default GPS rules without opening Manage rules. Existing choices, including None and edit-only rules, should remain unchanged.
 4. Check a normal capture and sync. Saving a rule change should update the capture form immediately.
 5. After the connected reload, disconnect and reopen the app to verify offline operation. Reconnect afterward.

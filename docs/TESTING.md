@@ -1,6 +1,6 @@
 # Automated Testing Guide
 
-Run the relevant suites before merging and the full suite before a release. This guide matches the v1.2.0.9 scripts and configuration. Test totals are printed by each runner; the suite targets the current storage, browser, and Sealog API contracts.
+Run the relevant suites before merging and the full suite before a release. This guide matches the v1.2.0.10 scripts and configuration. Test totals are printed by each runner; the suite targets the current storage, browser, and Sealog API contracts.
 
 ## Prerequisites
 

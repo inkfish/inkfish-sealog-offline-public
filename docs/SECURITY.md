@@ -1,6 +1,6 @@
 # Security and deployment boundaries
 
-These notes describe the v1.2.0.9 app and reference [`sealog.conf`](../sealog.conf). Use them when configuring [installation](INSTALLATION.md), [certificates](cert-generation.md), and shared operator devices. The app is a static browser client; Sealog Server provides accounts, permissions, and the server-side record store.
+These notes describe the v1.2.0.10 app and reference [`sealog.conf`](../sealog.conf). Use them when configuring [installation](INSTALLATION.md), [certificates](cert-generation.md), and shared operator devices. The app is a static browser client; Sealog Server provides accounts, permissions, and the server-side record store.
 
 ## Reporting a vulnerability
 

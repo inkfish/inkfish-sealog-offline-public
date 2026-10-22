@@ -3,7 +3,7 @@
 The app is static HTML, CSS, and JavaScript. There is no build step, `.env` loader,
 or single deployment JSON file. Server routing lives in [`sealog.conf`](../sealog.conf),
 certificate inputs live in a local JSON file, and interface changes are made in
-the source files listed below. This guide describes **v1.2.0.9**.
+the source files listed below. This guide describes **v1.2.0.10**.
 
 For a new installation, make your choices here, then follow
 [Install the application](INSTALLATION.md). Use a separate test browser profile
@@ -260,7 +260,7 @@ contract, not just changing its visible label.
 
 ## Prepare the customized app for installation
 
-Keep **v1.2.0.9** for this release; documentation or initial deployment configuration
+Keep **v1.2.0.10** for this release; documentation or initial deployment configuration
 does not require a version increment. Future application releases should follow
 [Release](RELEASE.md) so app and worker versions stay aligned. Never rename the
 IndexedDB database or storage keys as a cosmetic branding change: existing device

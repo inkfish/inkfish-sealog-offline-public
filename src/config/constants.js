@@ -5,7 +5,7 @@
  */
 
 /** Semver-ish tag used as the Cache API key suffix and displayed as the app version. */
-export const CACHE_VERSION = 'v1.2.0.9';
+export const CACHE_VERSION = 'v1.2.0.10';
 
 /** Options passed to navigator.geolocation.getCurrentPosition. Timeout 10 s. */
 export const GEO_OPTIONS = Object.freeze({
