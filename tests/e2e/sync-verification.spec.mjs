@@ -33,12 +33,13 @@ async function openApp(browser, handler, { time } = {}) {
   });
   const page = await context.newPage();
   if (time) {
-    await page.clock.install({ time });
+    await page.clock.install({ time: new Date(new Date(time).getTime() - 60_000) });
     await page.clock.pauseAt(time);
   }
   await page.route('**/sealog-server/api/v1/events**', handler);
   await page.goto(`${baseURL}/index.html`);
   await expect(page.locator('#emptyState')).toBeVisible();
+  await expect(page.locator('#syncStatus')).toHaveText('All caught up.');
   return { page, context };
 }
 
@@ -163,26 +164,25 @@ test('a future retry survives reload and syncs automatically when due', async ({
 test('verification failures reach the retry limit and can later confirm manually without an author', async ({ browser }) => {
   let found = false;
   let posts = 0;
+  let lookups = 0;
   const { page, context } = await openApp(browser, async (route) => {
     if (route.request().method() === 'POST') posts += 1;
+    else lookups += 1;
     await json(route, found ? [serverRecord()] : { message: 'Unavailable' }, found ? 200 : 503);
   });
-  await expect(page.locator('#syncStatus')).toHaveText('All caught up.');
-  await expect(page.locator('#syncBtn')).toBeEnabled();
-  // Keep automatic verification out of this manual-retry fixture.
-  await seedEvent(page, {
-    syncState: 'verify-pending', verifyAttemptCount: 5,
-    verifyNextAttemptMs: Date.now() + 60_000
-  });
+  await seedEvent(page, { syncState: 'verify-pending', verifyAttemptCount: 5 });
   await page.evaluate(() => localStorage.removeItem('username'));
   await page.locator('#syncBtn').click();
   await expect.poll(async () => (await readEvent(page)).syncState).toBe('verify-failed');
   expect((await readEvent(page)).verifyAttemptCount).toBe(6);
   expect((await readEvent(page)).verifyNextAttemptMs).toBeNull();
+  await expect(page.locator('#syncBtn')).toBeEnabled();
+  expect(lookups).toBe(1);
   found = true;
   await page.locator('#syncBtn').click();
   await expect.poll(async () => (await readEvent(page)).syncState).toBe('synced');
   expect(posts).toBe(0);
+  expect(lookups).toBe(2);
   await context.close();
 });
 

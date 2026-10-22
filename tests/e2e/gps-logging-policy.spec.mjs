@@ -99,7 +99,7 @@ async function openApp(browser, { gps = {}, signedIn = true, frozen = false, sav
     await dialog.accept();
   });
   if (frozen) {
-    await page.clock.install({ time: CLOCK_TIME });
+    await page.clock.install({ time: new Date(CLOCK_TIME.getTime() - 60_000) });
     await page.clock.pauseAt(CLOCK_TIME);
   }
   await page.route('**/api/v1/**', async (route) => {

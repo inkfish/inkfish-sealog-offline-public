@@ -265,8 +265,11 @@ async function main() {
       await page.waitForTimeout(1500);
       await page.click('#gpsStatus');
       await page.waitForSelector('#gpsModal:not([hidden])', { timeout: 5000 });
+      await page.locator('#gpsAllowPoorToggle').check();
+      await page.waitForSelector('#gpsLoggingPolicyWarning:not([hidden])');
       await page.waitForTimeout(400);
       await shoot(page, '04-gps-modal');
+      await page.locator('#gpsAllowPoorToggle').uncheck();
       await page.close();
     }
 

@@ -4936,6 +4936,7 @@ async function syncAll({ manual = false } = {}) {
   }
 
   const events = await getAllEvents();
+  if (syncInFlight) return;
 
   if (!navigator.onLine) {
     const nextRetry = earliestRetryFrom(events);
@@ -4974,7 +4975,7 @@ async function syncAll({ manual = false } = {}) {
         Infinity
       );
       scheduleNextSync(nextRetry);
-      scheduleNextVerify(awaitingVerification.length ? nextVerify : null);
+      if (!manual) scheduleNextVerify(awaitingVerification.length ? nextVerify : null);
       const messages = [];
       if (nextRetry) messages.push('Awaiting next retry window.');
       if (awaitingVerification.length) messages.push('Awaiting server confirmation.');
@@ -5150,7 +5151,7 @@ async function syncAll({ manual = false } = {}) {
             resetAttempts: true
           });
           await put(EVENT_STORE, latest);
-          scheduleNextVerify(nextVerify);
+          if (!manual) scheduleNextVerify(nextVerify);
           const existingRecord = await fetchServerEventByClientUuid(apiRoot, jwt, event.localId);
           const existingId = extractServerEventId(existingRecord);
           if (existingId) {
@@ -5183,7 +5184,7 @@ async function syncAll({ manual = false } = {}) {
               resetAttempts: true
             });
             await put(EVENT_STORE, latest);
-            scheduleNextVerify(nextVerify);
+            if (!manual) scheduleNextVerify(nextVerify);
             serverRecord = await fetchServerEventByClientUuid(apiRoot, jwt, event.localId);
             serverId = extractServerEventId(serverRecord);
           }
@@ -5215,7 +5216,7 @@ async function syncAll({ manual = false } = {}) {
           target.nextAttemptMs = null;
         } else if (target.syncState === SYNC_STATE.VERIFY_PENDING) {
           target.nextAttemptMs = null;
-          scheduleNextVerify(target.verifyNextAttemptMs);
+          if (!manual) scheduleNextVerify(target.verifyNextAttemptMs);
         } else if (isPatch) {
           if (target.syncState !== SYNC_STATE.PATCH_PENDING) {
             target.syncState = SYNC_STATE.PATCH_FAILED;
@@ -5265,7 +5266,7 @@ async function syncAll({ manual = false } = {}) {
     const nextRetry = earliestRetryFrom(latestEvents);
     scheduleNextSync(nextRetry);
     const nextVerify = earliestVerifyFrom(latestEvents);
-    scheduleNextVerify(nextVerify);
+    if (!manual) scheduleNextVerify(nextVerify);
   } finally {
     syncInFlight = false;
     dom.syncBtn.disabled = verifyInFlight;
@@ -5282,6 +5283,7 @@ async function verifyPendingEvents({ manual = false } = {}) {
   const jwt = localStorage.getItem('jwt');
   if (!jwt) return;
   const events = await getAllEvents();
+  if (verifyInFlight) return;
 
   if (!navigator.onLine) {
     const next = earliestVerifyFrom(events);
@@ -5323,7 +5325,8 @@ async function verifyPendingEvents({ manual = false } = {}) {
     for (const item of pending) {
       const current = await getEvent(item.localId);
       if (!current) continue;
-      if (current.syncState !== SYNC_STATE.VERIFY_PENDING && current.syncState !== SYNC_STATE.VERIFY_FAILED) continue;
+      if (current.syncState !== SYNC_STATE.VERIFY_PENDING &&
+          !(manual && current.syncState === SYNC_STATE.VERIFY_FAILED)) continue;
       if (!manual && current.verifyNextAttemptMs && current.verifyNextAttemptMs > Date.now()) continue;
 
       let failure = 'Awaiting server confirmation';
@@ -5368,6 +5371,8 @@ async function verifyPendingEvents({ manual = false } = {}) {
 }
 
 dom.syncBtn.addEventListener('click', async () => {
+  // This action runs verification itself; a due timer must not start another pass.
+  scheduleNextVerify(null);
   await syncAll({ manual: true });
   await verifyPendingEvents({ manual: true });
 });
@@ -5832,6 +5837,8 @@ function monitorRegistrationForUpdates(registration) {
   if (registration.__monitoringUpdates) return;
   registration.__monitoringUpdates = true;
 
+  const hasWaitingUpdate = () => Boolean(registration.waiting && registration.active);
+
   const notifyUpdate = (versionHint = null) => {
     if (versionHint) {
       if (shouldShowBanner(CACHE_VERSION, versionHint, lastBannerVersion)) {
@@ -5844,6 +5851,9 @@ function monitorRegistrationForUpdates(registration) {
       // Let a racing SW_UPDATE_READY message show the version first.
       // Use a versionless banner only if that message has not arrived.
       setTimeout(() => {
+        // A matching SW_STATE cancels the fallback unless an older active
+        // worker still has an update waiting for the user's reload.
+        if (!passiveUpdateNotified && !hasWaitingUpdate()) return;
         if (lastBannerVersion) return;
         if (dom.updateBanner && !dom.updateBanner.hidden) return;
         showUpdateBanner(null);
@@ -5852,7 +5862,9 @@ function monitorRegistrationForUpdates(registration) {
   };
 
   const handleWaitingWorker = () => {
-    if (!registration.waiting) return;
+    // A first installation can briefly be waiting without replacing an
+    // active worker. Only a replacement is an app update.
+    if (!hasWaitingUpdate()) return;
     notifyUpdate(null);
   };
 
